@@ -51,51 +51,73 @@ public unsafe class Memory
 
     private byte PacketDispatcher_OnSendPacketDetour(nint a1, nint a2, nint a3, byte a4)
     {
+        const byte DefaultReturnValue = 1;
+
+        if (a2 == IntPtr.Zero)
+        {
+            PluginLog.Error("[HyperFirewall] Error: Opcode pointer is null.");
+            return DefaultReturnValue;
+        }
+
         try
         {
             var opcode = *(ushort*)a2;
-            if(opcode == 566)
+
+            switch (opcode)
             {
-                PluginLog.Verbose($"[HyperFirewall] Passing outgoing packet with opcode {opcode} through");
-                return PacketDispatcher_OnSendPacketHook.Original(a1, a2, a3, a4);
-            }
-            else
-            {
-                PluginLog.Verbose($"[HyperFirewall] Suppressing outgoing packet with opcode {opcode}");
+                case 566:
+                    PluginLog.Verbose($"[HyperFirewall] Passing outgoing packet with opcode {opcode} through.");
+                    return PacketDispatcher_OnSendPacketHook.Original(a1, a2, a3, a4);
+
+                default:
+                    PluginLog.Verbose($"[HyperFirewall] Suppressing outgoing packet with opcode {opcode}.");
+                    break;
             }
         }
         catch (Exception e)
         {
+            PluginLog.Error($"[HyperFirewall] Exception caught while processing opcode: {e.Message}");
             e.Log();
+            return DefaultReturnValue;
         }
-        return 1;
+
+        return DefaultReturnValue;
     }
 
     private nint PacketDispatcher_OnReceivePacketDetour(nint a1, uint a2, nint a3)
     {
+        const nint DefaultReturnValue = 0;
+
+        if (a3 == IntPtr.Zero)
+        {
+            PluginLog.Error("[HyperFirewall] Error: Data pointer is null.");
+            return DefaultReturnValue;
+        }
+
         try
         {
             var opcode = *(ushort*)(a3 + 2);
-            if (opcode == 388)
+
+            switch (opcode)
             {
-                PluginLog.Verbose($"[HyperFirewall] Passing incoming packet with opcode {opcode} through");
-                return PacketDispatcher_OnReceivePacketHook.Original(a1, a2, a3);
-            }
-            else if (opcode == 226)
-            {
-                PluginLog.Verbose($"[HyperFirewall] Passing incoming packet with opcode {opcode} through");
-                return PacketDispatcher_OnReceivePacketHook.Original(a1, a2, a3);
-            }
-            else
-            {
-                PluginLog.Verbose($"[HyperFirewall] Suppressing incoming packet with opcode {opcode}");
+                case 388:
+                case 226:
+                    PluginLog.Verbose($"[HyperFirewall] Passing incoming packet with opcode {opcode} through.");
+                    return PacketDispatcher_OnReceivePacketHook.Original(a1, a2, a3);
+
+                default:
+                    PluginLog.Verbose($"[HyperFirewall] Suppressing incoming packet with opcode {opcode}.");
+                    break;
             }
         }
         catch (Exception e)
         {
+            PluginLog.Error($"[HyperFirewall] Exception caught while processing opcode: {e.Message}");
             e.Log();
+            return DefaultReturnValue;
         }
-        return 0;
+
+        return DefaultReturnValue;
     }
 
     internal nint LoadZoneDetour(nint a1, uint a2, int a3, byte a4, byte a5, byte a6)
