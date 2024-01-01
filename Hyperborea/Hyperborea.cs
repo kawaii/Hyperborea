@@ -27,8 +27,8 @@ public unsafe class Hyperborea : IDalamudPlugin
         {
             Config = EzConfig.Init<Config>();
             EzConfigGui.Init(UI.DrawNeo);
-            EzConfigGui.Window.SizeConstraints = new() { MinimumSize = new(300f.Scale(), 100f), MaximumSize = new(300f.Scale(), 1000f) };
-            EzConfigGui.Window.Flags = ImGuiWindowFlags.AlwaysAutoResize;
+            EzConfigGui.Window.SizeConstraints = new() { MinimumSize = new(400f.Scale(), 100f), MaximumSize = new(400f.Scale(), 1200f) };
+            EzConfigGui.Window.Flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoScrollbar;
             EzCmd.Add("/hyper", OnCommand);
             Memory = new();
             SettingsWindow = new();
