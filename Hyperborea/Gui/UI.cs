@@ -156,8 +156,13 @@ public unsafe static class UI
             ImGuiHelpers.ScaledDummy(3f);
 
             {
+                var size = ImGuiEx.CalcIconSize("\uf3c5", true);
+                size += ImGuiEx.CalcIconSize("\uf15c", true);
+                size += ImGuiEx.CalcIconSize(FontAwesomeIcon.Cog, true);
+                size.X += ImGui.GetStyle().ItemSpacing.X * 2;
+
                 var cur2 = ImGui.GetCursorPos();
-                ImGui.SetCursorPosX(ImGuiEx.GetWindowContentRegionWidth() - 80f.Scale());
+                ImGui.SetCursorPosX(ImGuiEx.GetWindowContentRegionWidth() - size.X);
                 var disabled = !Utils.CanUse();
                 if (disabled) ImGui.BeginDisabled();
                 if (ImGuiEx.IconButton("\uf3c5"))

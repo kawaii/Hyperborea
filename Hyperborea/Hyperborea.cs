@@ -25,9 +25,14 @@ public unsafe class Hyperborea : IDalamudPlugin
 
         new TickScheduler(() =>
         {
+            var scale = ImGui.GetIO().FontGlobalScale;
+            var constraint = new Window.WindowSizeConstraints() { MinimumSize = new(300f * scale, 100f), MaximumSize = new(300f * scale, 1000f) };
+            constraint.MaximumSize /= ImGuiHelpers.GlobalScale ;
+            constraint.MinimumSize /= ImGuiHelpers.GlobalScale ;
+
             Config = EzConfig.Init<Config>();
             EzConfigGui.Init(UI.DrawNeo);
-            EzConfigGui.Window.SizeConstraints = new() { MinimumSize = new(400f.Scale(), 100f), MaximumSize = new(400f.Scale(), 1200f) };
+            EzConfigGui.Window.SizeConstraints = constraint;
             EzConfigGui.Window.Flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoScrollbar;
             EzCmd.Add("/hyper", OnCommand);
             Memory = new();
