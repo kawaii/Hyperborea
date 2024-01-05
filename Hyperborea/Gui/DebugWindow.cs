@@ -1,7 +1,5 @@
-﻿using ECommons.ExcelServices;
-using ECommons.SimpleGui;
+﻿using ECommons.SimpleGui;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
-using Lumina.Excel.GeneratedSheets;
 
 namespace Hyperborea.Gui;
 public unsafe class DebugWindow: Window

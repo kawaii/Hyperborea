@@ -18,7 +18,6 @@ public unsafe static class UI
     static int a5 = 1;
     internal static int a6 = 1;
     static Point3 Position = new(0,0,0);
-    static bool SpawnOverride;
 
     public static void DrawNeo()
     {
@@ -95,25 +94,6 @@ public unsafe static class UI
             ImGui.PopFont();
         }
         ImGuiEx.Tooltip("While Hyperborea attempts to implement safety as much as possible by preventing sending data to server while using it, no guarantees is given and it's always recommended to use it with free trial account.");
-
-        /*ImGui.SameLine();
-
-        ImGuiEx.Text("In The Inn:");
-        ImGui.SameLine();
-        if (Utils.IsInInnInternal() || (SavedZoneState != null && Svc.Data.GetExcelSheet<TerritoryType>().GetRow(SavedZoneState.ZoneId).TerritoryIntendedUse == (uint)TerritoryIntendedUseEnum.Inn))
-        {
-            ImGui.PushFont(UiBuilder.IconFont);
-            ImGuiEx.Text(EColor.GreenBright, FontAwesomeIcon.Check.ToIconString());
-            ImGui.PopFont();
-        }
-        else
-        {
-            ImGui.PushFont(UiBuilder.IconFont);
-            ImGuiEx.Text(EColor.RedBright, "\uf00d");
-            ImGui.PopFont();
-        }
-        ImGuiEx.Tooltip("Hyperborea can only be used in the inn.");
-        */
 
         if (ImGuiGroup.BeginGroupBox())
         {

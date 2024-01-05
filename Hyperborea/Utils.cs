@@ -4,12 +4,10 @@ using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
-using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using Hyperborea.Gui;
 using Lumina.Excel.GeneratedSheets;
 using System.Globalization;
-using System.Net.NetworkInformation;
 
 namespace Hyperborea;
 public unsafe static class Utils
@@ -21,12 +19,12 @@ public unsafe static class Utils
         var ret = true;
         if (!Player.Available)
         {
-            reasons.Add("Not Logged In");
+            reasons.Add("LocalPlayer Missing (Not logged in");
             ret = false;
         }
         else if(Svc.Data.GetExcelSheet<TerritoryType>().GetRow(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse != (byte)TerritoryIntendedUseEnum.Inn && !C.DisableInnCheck)
         {
-            reasons.Add("Zone Restriction Active");
+            reasons.Add("Zone Restriction Active (Must be in an inn room)");
             ret = false;
         }
         foreach (var cond in Enum.GetValues<ConditionFlag>())
@@ -39,11 +37,6 @@ public unsafe static class Utils
             }
         }
         return ret;
-    }
-
-    public static bool IsNear(this Vector3 v, Vector3 o)
-    {
-        return Vector3.DistanceSquared(v, o) < 1;
     }
 
     public static Vector3 CameraPos => *(Vector3*)((nint)CameraManager.Instance()->GetActiveCamera() + 0x60);
