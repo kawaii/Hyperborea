@@ -12,6 +12,33 @@ using System.Globalization;
 namespace Hyperborea;
 public unsafe static class Utils
 {
+    public static bool CanEnablePlugin(out List<string> reasons)
+    {
+        reasons = [];
+        if (P.Enabled) return true;
+        var ret = true;
+        if (!Player.Available)
+        {
+            reasons.Add("LocalPlayer Missing (Not logged in");
+            ret = false;
+        }
+        else if(Svc.Data.GetExcelSheet<TerritoryType>().GetRow(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse != (byte)TerritoryIntendedUseEnum.Inn && !C.DisableInnCheck)
+        {
+            reasons.Add("Zone Restriction Active (Must be in an inn room)");
+            ret = false;
+        }
+        foreach (var cond in Enum.GetValues<ConditionFlag>())
+        {
+            if (cond.EqualsAny(ConditionFlag.NormalConditions, ConditionFlag.OnFreeTrial, ConditionFlag.ParticipatingInCrossWorldPartyOrAlliance, ConditionFlag.DutyRecorderPlayback)) continue;
+            if (Svc.Condition[cond])
+            {
+                reasons.Add($"{cond}");
+                ret = false;
+            }
+        }
+        return ret;
+    }
+
     public static Vector3 CameraPos => *(Vector3*)((nint)CameraManager.Instance()->GetActiveCamera() + 0x60);
 
     public static bool TryFindBytes(this byte[] haystack, byte[] needle, out int pos)
