@@ -18,11 +18,12 @@ public unsafe static class UI
     static int a5 = 1;
     internal static int a6 = 1;
     static Point3 Position = new(0,0,0);
+    static bool SpawnOverride;
 
     public static void DrawNeo()
     {
         var l = LayoutWorld.Instance()->ActiveLayout;
-        var disableCheckbox = !(Utils.IsInInn() || C.DisableInnCheck) && !P.Enabled;
+        var disableCheckbox = !Utils.CanEnablePlugin(out var DisableReasons);
         if (disableCheckbox) ImGui.BeginDisabled();
         if (ImGui.Checkbox("Enable Hyperborea", ref P.Enabled))
         {
@@ -41,7 +42,11 @@ public unsafe static class UI
                 P.Memory.TargetSystem_InteractWithObjectHook.Disable();
             }
         }
-        if (disableCheckbox) ImGui.EndDisabled();
+        if (disableCheckbox)
+        {
+            ImGui.EndDisabled();
+            ImGuiEx.HelpMarker($"Hyperborea cannot be enabled as you are under the following restricted condition(s):\n{DisableReasons.Print("\n")}", ImGuiColors.DalamudOrange);
+        }
         ImGuiEx.Text("Packet Filter:");
         ImGui.SameLine();
         if (P.Memory.PacketDispatcher_OnSendPacketHook.IsEnabled && P.Memory.PacketDispatcher_OnReceivePacketHook.IsEnabled)
@@ -91,7 +96,8 @@ public unsafe static class UI
         }
         ImGuiEx.Tooltip("While Hyperborea attempts to implement safety as much as possible by preventing sending data to server while using it, no guarantees is given and it's always recommended to use it with free trial account.");
 
-        ImGui.SameLine();
+        /*ImGui.SameLine();
+
         ImGuiEx.Text("In The Inn:");
         ImGui.SameLine();
         if (Utils.IsInInnInternal() || (SavedZoneState != null && Svc.Data.GetExcelSheet<TerritoryType>().GetRow(SavedZoneState.ZoneId).TerritoryIntendedUse == (uint)TerritoryIntendedUseEnum.Inn))
@@ -107,7 +113,7 @@ public unsafe static class UI
             ImGui.PopFont();
         }
         ImGuiEx.Tooltip("Hyperborea can only be used in the inn.");
-
+        */
 
         if (ImGuiGroup.BeginGroupBox())
         {
@@ -125,6 +131,7 @@ public unsafe static class UI
                     }*/
                 });
             }
+
             ImGui.SetCursorPos(cur);
             ImGuiEx.TextV("Zone Data:");
             ImGuiEx.SetNextItemWidthScaled(150);
