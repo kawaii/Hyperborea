@@ -3,7 +3,7 @@
     "Name": "Hyperborea",
     "InternalName": "Hyperborea",
     "Description": "Load and explore any zone in relative safety, mainly for taking GPoses in now inaccessible locations.",
-    "ApplicableVersion": "2023.11.09.0000.0000",
+    "ApplicableVersion": "2024.01.06.0000.0000",
     "Punchline": "What if we GPosed in the Mordion Gaol?",
     "RepoUrl": "https://github.com/kawaii/Hyperborea",
     "AcceptsFeedback": false,

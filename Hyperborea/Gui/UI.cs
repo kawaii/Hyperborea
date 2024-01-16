@@ -1,8 +1,10 @@
-﻿using Dalamud.Interface.Components;
+using Dalamud.Interface.Components;
 using ECommons.ExcelServices;
 using ECommons.ExcelServices.TerritoryEnumeration;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods.TerritorySelection;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using Lumina.Excel.GeneratedSheets;
 
@@ -18,6 +20,7 @@ public unsafe static class UI
     static int a5 = 1;
     internal static int a6 = 1;
     static Point3 Position = new(0,0,0);
+    static bool SpawnOverride;
 
     public static void DrawNeo()
     {
@@ -38,7 +41,7 @@ public unsafe static class UI
                 SavedPos = null;
                 SavedZoneState = null;
                 P.Memory.DisableFirewall();
-                P.Memory.TargetSystem_InteractWithObjectHook.Disable();
+                P.Memory.TargetSystem_InteractWithObjectHook.Pause();
             }
         }
         if (disableCheckbox)
@@ -97,105 +100,139 @@ public unsafe static class UI
 
         if (ImGuiGroup.BeginGroupBox())
         {
-            var cur = ImGui.GetCursorPos();
-            ImGui.SetCursorPosX(ImGuiEx.GetWindowContentRegionWidth() - ImGuiHelpers.GetButtonSize("Browse").X - 20f.Scale());
-            if (ImGuiComponents.IconButtonWithText((FontAwesomeIcon)0xf002, "Browse"))
+            try
             {
-                new TerritorySelector((uint)a2, (sel, x) =>
+                ZoneInfo info = null;
+                var layout = Utils.GetLayout();
+                Utils.TryGetZoneData(layout, out info);
+
+                var cur = ImGui.GetCursorPos();
+                ImGui.SetCursorPosX(ImGuiEx.GetWindowContentRegionWidth() - ImGuiHelpers.GetButtonSize("Browse").X - ImGuiHelpers.GetButtonSize("Zone Editor").X - 50f.Scale());
+                if (ImGuiComponents.IconButtonWithText((FontAwesomeIcon)0xf002, "Browse"))
                 {
-                    a2 = (int)x;
-                    /*if (Utils.CanUse())
+                    new TerritorySelector((uint)a2, (sel, x) =>
                     {
+                        a2 = (int)x;
+                    });
+                }
+                ImGui.SameLine();
+                if (ImGuiComponents.IconButtonWithText((FontAwesomeIcon)0xf303, "Zone Editor"))
+                {
+                    P.EditorWindow.IsOpen = true;
+                    P.EditorWindow.SelectedTerritory = (uint)a2;
+                }
+
+                ImGui.SetCursorPos(cur);
+                ImGuiEx.TextV("Zone Data:");
+                ImGuiEx.SetNextItemWidthScaled(150);
+                var dis = TerritorySelector.Selectors.Any(x => x.IsOpen);
+                if (dis) ImGui.BeginDisabled();
+                ImGui.InputInt("Territory Type ID", ref a2);
+                if (dis) ImGui.EndDisabled();
+                if (ExcelTerritoryHelper.NameExists((uint)a2))
+                {
+                    ImGuiEx.Text(ExcelTerritoryHelper.GetName((uint)a2));
+                }
+                ImGuiEx.Text($"Additional Data:");
+                ImGuiEx.SetNextItemWidthScaled(150);
+                var StoryValues = Utils.GetStoryValues((uint)a2);
+                var disableda3 = !StoryValues.Any(x => x != 0);
+                if (disableda3) ImGui.BeginDisabled();
+                if (ImGui.BeginCombo("Story Progress", $"{a3}"))
+                {
+                    foreach (var x in StoryValues.Order())
+                    {
+                        if (ImGui.Selectable($"{x}", a3 == x)) a3 = (int)x;
+                        if (a3 == x && ImGui.IsWindowAppearing()) ImGui.SetScrollHereY();
+                    }
+                    ImGui.EndCombo();
+                }
+                if (disableda3) ImGui.EndDisabled();
+                if (!StoryValues.Contains((uint)a3)) a3 = (int)StoryValues.FirstOrDefault();
+                ImGuiEx.SetNextItemWidthScaled(150);
+                ImGui.InputInt("Argument 4", ref a4);
+                ImGuiEx.SetNextItemWidthScaled(150);
+                ImGui.InputInt("Argument 5", ref a5);
+
+                ImGui.Checkbox($"Spawn Override:", ref SpawnOverride);
+                if (!SpawnOverride) ImGui.BeginDisabled();
+                CoordBlock("X:", ref Position.X);
+                ImGui.SameLine();
+                CoordBlock("Y:", ref Position.Y);
+                ImGui.SameLine();
+                CoordBlock("Z:", ref Position.Z);
+                if (!SpawnOverride) ImGui.EndDisabled();
+
+                ImGuiHelpers.ScaledDummy(3f);
+                ImGui.Separator();
+                ImGuiHelpers.ScaledDummy(3f);
+
+                {
+                    var size = ImGuiEx.CalcIconSize("\uf3c5", true);
+                    size += ImGuiEx.CalcIconSize("\uf15c", true);
+                    size += ImGuiEx.CalcIconSize(FontAwesomeIcon.Cog, true);
+                    size.X += ImGui.GetStyle().ItemSpacing.X * 3;
+
+                    var cur2 = ImGui.GetCursorPos();
+                    ImGui.SetCursorPosX(ImGuiEx.GetWindowContentRegionWidth() - size.X);
+                    var disabled = !Utils.CanUse();
+                    if (disabled) ImGui.BeginDisabled();
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.Compass))
+                    {
+                        P.CompassWindow.IsOpen = !P.CompassWindow.IsOpen;
+                    }
+                    if (disabled) ImGui.EndDisabled();
+                    ImGui.SameLine();
+                    if (ImGuiEx.IconButton("\uf15c"))
+                    {
+                        P.LogWindow.IsOpen = true;
+                    }
+                    ImGui.SameLine();
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.Cog))
+                    {
+                        P.SettingsWindow.IsOpen = true;
+                    }
+                    ImGui.SetCursorPos(cur2);
+                }
+
+                {
+                    var disabled = !Utils.CanUse();
+                    if (disabled) ImGui.BeginDisabled();
+                    if (ImGui.Button("Load Zone"))
+                    {
+                        Utils.TryGetZoneData(Utils.GetLayout((uint)a2), out var info2);
                         SavedZoneState ??= new SavedZoneState(l->TerritoryTypeId, Player.Object.Position);
-                        Utils.LoadZone(x, inp2, inp3, inp4, inp5);
-                    }*/
-                });
-            }
-
-            ImGui.SetCursorPos(cur);
-            ImGuiEx.TextV("Zone Data:");
-            ImGuiEx.SetNextItemWidthScaled(150);
-            var dis = TerritorySelector.Selectors.Any(x => x.IsOpen);
-            if (dis) ImGui.BeginDisabled();
-            ImGui.InputInt("Territory Type ID", ref a2);
-            if (dis) ImGui.EndDisabled();
-            if (ExcelTerritoryHelper.NameExists((uint)a2))
-            {
-                ImGuiEx.Text(ExcelTerritoryHelper.GetName((uint)a2));
-            }
-            ImGuiEx.Text($"Additional Data:");
-            ImGuiEx.SetNextItemWidthScaled(150);
-            ImGui.InputInt("Argument 3", ref a3);
-            ImGuiEx.SetNextItemWidthScaled(150);
-            ImGui.InputInt("Argument 4", ref a4);
-            ImGuiEx.SetNextItemWidthScaled(150);
-            ImGui.InputInt("Argument 5", ref a5);
-
-            ImGuiEx.Text($"Spawn Override:");
-            CoordBlock("X:", ref Position.X);
-            ImGui.SameLine();
-            CoordBlock("Y:", ref Position.Y);
-            ImGui.SameLine();
-            CoordBlock("Z:", ref Position.Z);
-
-            ImGuiHelpers.ScaledDummy(3f);
-            ImGui.Separator();
-            ImGuiHelpers.ScaledDummy(3f);
-
-            {
-                var size = ImGuiEx.CalcIconSize("\uf3c5", true);
-                size += ImGuiEx.CalcIconSize("\uf15c", true);
-                size += ImGuiEx.CalcIconSize(FontAwesomeIcon.Cog, true);
-                size.X += ImGui.GetStyle().ItemSpacing.X * 2;
-
-                var cur2 = ImGui.GetCursorPos();
-                ImGui.SetCursorPosX(ImGuiEx.GetWindowContentRegionWidth() - size.X);
-                var disabled = !Utils.CanUse();
-                if (disabled) ImGui.BeginDisabled();
-                if (ImGuiEx.IconButton("\uf3c5"))
-                {
-                    Player.GameObject->SetPosition(Position.X, Position.Y, Position.Z);
-                }
-                ImGuiEx.Tooltip("Teleports to the coordinates defined in the spawn override setting. Only functional while Hyperborea is enabled.");
-                if (disabled) ImGui.EndDisabled();
-                ImGui.SameLine();
-                if (ImGuiEx.IconButton("\uf15c"))
-                {
-                    P.LogWindow.IsOpen = true;
+                        Utils.LoadZone((uint)a2, !SpawnOverride, true, a3, a4, a5, a6);
+                        if (SpawnOverride)
+                        {
+                            Player.GameObject->SetPosition(Position.X, Position.Y, Position.Z);
+                        }
+                        else if (info2 != null && info2.Spawn != null)
+                        {
+                            Player.GameObject->SetPosition(info2.Spawn.X, info2.Spawn.Y, info2.Spawn.Z);
+                        }
+                    }
+                    if (disabled) ImGui.EndDisabled();
                 }
                 ImGui.SameLine();
-                if (ImGuiEx.IconButton(FontAwesomeIcon.Cog))
                 {
-                    P.SettingsWindow.IsOpen = true;
+                    var disabled = !P.Enabled;
+                    if (disabled) ImGui.BeginDisabled();
+                    if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Undo, "Revert"))
+                    {
+                        Utils.Revert();
+                    }
+                    if (disabled) ImGui.EndDisabled();
                 }
-                ImGui.SetCursorPos(cur2);
             }
-
+            catch(Exception e)
             {
-                var disabled = !Utils.CanUse();
-                if (disabled) ImGui.BeginDisabled();
-                if (ImGui.Button("Load Zone"))
-                {
-                    SavedZoneState ??= new SavedZoneState(l->TerritoryTypeId, Player.Object.Position);
-                    Utils.LoadZone((uint)a2, a3, a4, a5, a6);
-                    Player.GameObject->SetPosition(Position.X, Position.Y, Position.Z);
-                }
-                if (disabled) ImGui.EndDisabled();
-            }
-            ImGui.SameLine();
-            {
-                var disabled = !P.Enabled;
-                if (disabled) ImGui.BeginDisabled();
-                if (ImGuiComponents.IconButtonWithText(FontAwesomeIcon.Undo, "Revert"))
-                {
-                    Utils.Revert();
-                }
-                if (disabled) ImGui.EndDisabled();
+                ImGuiEx.Text(e.ToString());
             }
             ImGuiGroup.EndGroupBox();
         }
     }
-    static void CoordBlock(string t, ref float p)
+    internal static void CoordBlock(string t, ref float p)
     {
         ImGuiEx.TextV(t);
         ImGui.SameLine();

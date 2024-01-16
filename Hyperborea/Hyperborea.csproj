@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Authors>kawaii</Authors>
-        <Version>1.0.0.3</Version>
+        <Version>1.0.0.4</Version>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -70,5 +70,11 @@
             <HintPath>$(DalamudLibPath)PInvoke.User32.dll</HintPath>
             <Private>False</Private>
         </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="data.yaml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 </Project>
