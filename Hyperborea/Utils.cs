@@ -1,4 +1,4 @@
-﻿using ECommons.Configuration;
+using ECommons.Configuration;
 using ECommons.ExcelServices;
 using ECommons.ExcelServices.TerritoryEnumeration;
 using ECommons.GameFunctions;
@@ -101,12 +101,12 @@ public unsafe static class Utils
         var ret = true;
         if (!Player.Available)
         {
-            reasons.Add("Not logged in");
+            reasons.Add("LocalPlayer Missing (Not logged in");
             ret = false;
         }
         else if(Svc.Data.GetExcelSheet<TerritoryType>().GetRow(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse != (byte)TerritoryIntendedUseEnum.Inn && !C.DisableInnCheck)
         {
-            reasons.Add("Not in the inn");
+            reasons.Add("Zone Restriction Active (Must be in an inn room)");
             ret = false;
         }
         foreach (var cond in Enum.GetValues<ConditionFlag>())
@@ -156,7 +156,7 @@ public unsafe static class Utils
     {
         return Vector3.DistanceSquared(v, o) < 1;
     }
-
+  
     public static Vector3 CameraPos => *(Vector3*)((nint)CameraManager.Instance()->GetActiveCamera() + 0x60);
 
     public static bool TryFindBytes(this byte[] haystack, byte[] needle, out int pos)

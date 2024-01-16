@@ -1,4 +1,4 @@
-﻿using Dalamud.Interface.Components;
+using Dalamud.Interface.Components;
 using ECommons.ExcelServices;
 using ECommons.ExcelServices.TerritoryEnumeration;
 using ECommons.GameHelpers;
@@ -98,25 +98,6 @@ public unsafe static class UI
         }
         ImGuiEx.Tooltip("While Hyperborea attempts to implement safety as much as possible by preventing sending data to server while using it, no guarantees is given and it's always recommended to use it with free trial account.");
 
-        /*ImGui.SameLine();
-
-        ImGuiEx.Text("In The Inn:");
-        ImGui.SameLine();
-        if (Utils.IsInInnInternal() || (SavedZoneState != null && Svc.Data.GetExcelSheet<TerritoryType>().GetRow(SavedZoneState.ZoneId).TerritoryIntendedUse == (uint)TerritoryIntendedUseEnum.Inn))
-        {
-            ImGui.PushFont(UiBuilder.IconFont);
-            ImGuiEx.Text(EColor.GreenBright, FontAwesomeIcon.Check.ToIconString());
-            ImGui.PopFont();
-        }
-        else
-        {
-            ImGui.PushFont(UiBuilder.IconFont);
-            ImGuiEx.Text(EColor.RedBright, "\uf00d");
-            ImGui.PopFont();
-        }
-        ImGuiEx.Tooltip("Hyperborea can only be used in the inn.");
-        */
-
         if (ImGuiGroup.BeginGroupBox())
         {
             try
@@ -124,34 +105,6 @@ public unsafe static class UI
                 ZoneInfo info = null;
                 var layout = Utils.GetLayout();
                 Utils.TryGetZoneData(layout, out info);
-                /*if (P.Enabled && layout != null && info != null && info.Phases.Count > 1)
-                {
-                    var array = info.Phases;
-                    var phase = Utils.GetPhase(Svc.ClientState.TerritoryType);
-                    var index = array.IndexOf(phase);
-                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowLeft))
-                    {
-                        if (index > 0)
-                        {
-                            array[index - 1].SwitchTo();
-                        }
-                    }
-
-                    ImGui.SameLine();
-
-                    ImGuiEx.Text($"{phase?.Name}");
-
-                    ImGui.SameLine();
-
-                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowRight))
-                    {
-                        if (index < array.Count - 1)
-                        {
-                            array[index + 1].SwitchTo();
-                        }
-                    }
-                    ImGui.Separator();
-                }*/
 
                 var cur = ImGui.GetCursorPos();
                 ImGui.SetCursorPosX(ImGuiEx.GetWindowContentRegionWidth() - ImGuiHelpers.GetButtonSize("Browse").X - ImGuiHelpers.GetButtonSize("Zone Editor").X - 50f.Scale());
