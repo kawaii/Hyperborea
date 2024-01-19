@@ -4,6 +4,7 @@ using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods.TerritorySelection;
 using ECommons.SimpleGui;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Hyperborea.Gui;
-public class EditorWindow : Window
+public unsafe class EditorWindow : Window
 {
     Dictionary<string, HashSet<uint>> BgToTerritoryType = [];
     internal uint SelectedTerritory = 0;
@@ -40,7 +41,7 @@ public class EditorWindow : Window
         var cur = ImGui.GetCursorPos();
         ImGui.PushFont(UiBuilder.IconFont);
         ImGui.SetCursorPosX(ImGuiEx.GetWindowContentRegionWidth() - ImGui.CalcTextSize("\uf0c7").X);
-        if(Utils.TryGetZoneData(ExcelTerritoryHelper.GetBG(TerrID), out _, out var isOverriden1))
+        if(Utils.TryGetZoneInfo(ExcelTerritoryHelper.GetBG(TerrID), out _, out var isOverriden1))
         {
             if (isOverriden1)
             {
@@ -88,7 +89,7 @@ public class EditorWindow : Window
         }
         else
         {
-            if (Utils.TryGetZoneData(bg, out var info, out var isOverriden))
+            if (Utils.TryGetZoneInfo(bg, out var info, out var isOverriden))
             {
                 var overrideSpawn = info.Spawn != null;
                 if (ImGui.Checkbox("Custom Spawn Point", ref overrideSpawn))
@@ -137,6 +138,11 @@ public class EditorWindow : Window
                             {
                                 if (ImGui.Selectable($"{x} - {Utils.GetWeatherName(x)}"))
                                 {
+                                    if (P.Enabled && Svc.ClientState.TerritoryType == TerrID && Utils.GetPhase(Svc.ClientState.TerritoryType) == p)
+                                    {
+                                        EnvManager.Instance()->ActiveWeather = (byte)x;
+                                        EnvManager.Instance()->TransitionTime = 0.5f;
+                                    }
                                     p.Weather = x;
                                 }
                             }

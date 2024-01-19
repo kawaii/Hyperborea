@@ -66,7 +66,7 @@ public unsafe class Memory
                 var level = Svc.Data.GetExcelSheet<TerritoryType>().GetRow(obj)?.Bg?.ExtractText();
                 if (!level.IsNullOrEmpty())
                 {
-                    if (Utils.TryGetZoneData(level, out var info))
+                    if (Utils.TryGetZoneInfo(level, out var info))
                     {
                         P.SaveZoneData();
                     }

@@ -22,7 +22,7 @@ public unsafe class CompassWindow : Window
     {
         if (!P.Enabled) return false;
         var layout = Utils.GetLayout();
-        Utils.TryGetZoneData(layout, out var info);
+        Utils.TryGetZoneInfo(layout, out var info);
         if (P.Enabled && layout != null) return true;
         return false;
     }
@@ -30,7 +30,7 @@ public unsafe class CompassWindow : Window
     public override void Draw()
     {
         var layout = Utils.GetLayout();
-        Utils.TryGetZoneData(layout, out var info, out var isOverriden);
+        Utils.TryGetZoneInfo(layout, out var info, out var isOverriden);
         if (P.Enabled && layout != null)
         {
             var array = info?.Phases ?? [];

@@ -22,15 +22,15 @@ public unsafe static class Utils
         P.BuiltInZoneData = EzConfig.LoadConfiguration<ZoneData>(Path.Combine(Svc.PluginInterface.AssemblyLocation.Directory.FullName, "data.yaml"));
     }
 
-    public static bool TryGetZoneData(string bg, out ZoneInfo info) => TryGetZoneData(bg, out info, out _);
+    public static bool TryGetZoneInfo(string bg, out ZoneInfo info) => TryGetZoneInfo(bg, out info, out _);
 
-    public static bool TryGetZoneData(string bg, out ZoneInfo info, out bool isOverriden)
+    public static bool TryGetZoneInfo(string bg, out ZoneInfo info, out bool isOverriden)
     {
-        info = GetZoneInto(bg, out isOverriden);
+        info = GetZoneInfo(bg, out isOverriden);
         return info != null;
     }
 
-    public static ZoneInfo GetZoneInto(string bg, out bool isOverriden)
+    public static ZoneInfo GetZoneInfo(string bg, out bool isOverriden)
     {
         isOverriden = false;
         {
@@ -144,7 +144,7 @@ public unsafe static class Utils
 
     public static PhaseInfo GetPhase(uint territoryType)
     {
-        if (P.ZoneData.Data.TryGetValue(GetLayout(territoryType), out var zone))
+        if (TryGetZoneInfo(ExcelTerritoryHelper.GetBG(territoryType), out var zone))
         {
             var e = EnvManager.Instance();
             if (zone.Phases.TryGetFirst(x => x.Weather == e->ActiveWeather, out var v)) return v;
@@ -238,7 +238,7 @@ public unsafe static class Utils
         P.Memory.LoadZoneDetour((nint)GameMain.Instance(), territory, a3, (byte)a4, (byte)a5, (byte)a6);
         P.Memory.SetupTerritoryType(EventFramework.Instance(), (ushort)territory);
         var level = Svc.Data.GetExcelSheet<TerritoryType>().GetRow(territory)?.Bg?.ExtractText();
-        if(!level.IsNullOrEmpty() && Utils.TryGetZoneData(level, out var value))
+        if(!level.IsNullOrEmpty() && Utils.TryGetZoneInfo(level, out var value))
         {
             if (setPosition && value.Spawn != null)
             {
