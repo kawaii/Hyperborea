@@ -104,7 +104,7 @@ public unsafe static class UI
             {
                 ZoneInfo info = null;
                 var layout = Utils.GetLayout();
-                Utils.TryGetZoneData(layout, out info);
+                Utils.TryGetZoneInfo(layout, out info);
 
                 var cur = ImGui.GetCursorPos();
                 ImGui.SetCursorPosX(ImGuiEx.GetWindowContentRegionWidth() - ImGuiHelpers.GetButtonSize("Browse").X - ImGuiHelpers.GetButtonSize("Zone Editor").X - 50f.Scale());
@@ -200,7 +200,7 @@ public unsafe static class UI
                     if (disabled) ImGui.BeginDisabled();
                     if (ImGui.Button("Load Zone"))
                     {
-                        Utils.TryGetZoneData(Utils.GetLayout((uint)a2), out var info2);
+                        Utils.TryGetZoneInfo(Utils.GetLayout((uint)a2), out var info2);
                         SavedZoneState ??= new SavedZoneState(l->TerritoryTypeId, Player.Object.Position);
                         Utils.LoadZone((uint)a2, !SpawnOverride, true, a3, a4, a5, a6);
                         if (SpawnOverride)
