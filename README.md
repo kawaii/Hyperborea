@@ -6,6 +6,7 @@ Load and explore any zone in relative safety, mainly for taking GPoses in now in
 
 Hyperborea operates by employing a packet filter while enabled. Only packets required to maintain your connection to the game server in such a way that you still appear online are passed through (known as "keepalive" packets). Anything else, such as movement, chat, actions - are all filtered from your client. To any observer you would just appear to be idle/AFK.
 
+[![Hyperborea v1.0.0.4](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fyoutu.be%2FxpX5UT7vSE0)](https://youtu.be/xpX5UT7vSE0)
 [![Hyperborea v1.0.0.0](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fyoutu.be%2FTilHuQlsNg4)](https://youtu.be/TilHuQlsNg4)
 
 ## Download & Install
