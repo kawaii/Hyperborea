@@ -1,23 +1,23 @@
 Data:
   ffxiv/fst_f1/bah/f1bz/level/f1bz:
-    Name: the Unending Coil of Bahamut (Ultimate)
+    Name: The Unending Coil of Bahamut (Ultimate)
     Spawn:
       X: 0
       Y: 0
       Z: 0
     Phases:
-    - Name: Phase 1
+    - Name: Twintania
       Weather: 2
       MapEffects: []
-    - Name: Phase 2
+    - Name: Nael Van Darnus
       Weather: 21
       MapEffects: []
-    - Name: Phase 3
+    - Name: Bahamut Prime
       Weather: 30
       MapEffects: []
-    - Name: Phase 4
+    - Name: Triple Threat
       Weather: 31
       MapEffects: []
-    - Name: Phase 5
+    - Name: Golden Bahamut
       Weather: 32
       MapEffects: []  

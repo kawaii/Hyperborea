@@ -192,7 +192,11 @@ public class EditorWindow : Window
                     if(ImGui.Button("Reset"))
                     {
                         Utils.LoadBuiltInZoneData();
-                        new TickScheduler(() => P.ZoneData.Data.Remove(bg));
+                        new TickScheduler(() =>
+                        {
+                            P.ZoneData.Data.Remove(bg);
+                            P.SaveZoneData();
+                        });
                     }
                 }
             }
