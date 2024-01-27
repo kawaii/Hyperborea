@@ -17,6 +17,32 @@ using System.IO;
 namespace Hyperborea;
 public unsafe static class Utils
 {
+    public static Vector3 RotatePoint(float cx, float cy, float angle, Vector3 p)
+    {
+        if (angle == 0f) return p;
+        var s = (float)Math.Sin(angle);
+        var c = (float)Math.Cos(angle);
+
+        // translate point back to origin:
+        p.X -= cx;
+        p.Z -= cy;
+
+        // rotate point
+        float xnew = p.X * c - p.Z * s;
+        float ynew = p.X * s + p.Z * c;
+
+        // translate point back:
+        p.X = xnew + cx;
+        p.Z = ynew + cy;
+        return p;
+    }
+
+    public static string GetMountName(uint id)
+    {
+        if (id == 0) return null;
+        return Svc.Data.GetExcelSheet<Mount>().GetRow(id)?.Singular?.ExtractText();
+    }
+
     public static void LoadBuiltInZoneData()
     {
         P.BuiltInZoneData = EzConfig.LoadConfiguration<ZoneData>(Path.Combine(Svc.PluginInterface.AssemblyLocation.Directory.FullName, "data.yaml"));
@@ -266,6 +292,7 @@ public unsafe static class Utils
 
     public static void Revert()
     {
+        if (Svc.Condition[ConditionFlag.Mounted]) Player.Character->Mount.CreateAndSetupMount(0, 0, 0, 0, 0, 0, 0);
         if (UI.SavedPos != null)
         {
             Player.GameObject->SetPosition(UI.SavedPos.Value.X, UI.SavedPos.Value.Y, UI.SavedPos.Value.Z);

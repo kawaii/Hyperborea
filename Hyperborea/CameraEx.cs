@@ -11,4 +11,5 @@ public unsafe partial struct CameraEx
     [FieldOffset(0x60)] public float x;
     [FieldOffset(0x64)] public float y;
     [FieldOffset(0x68)] public float z;
+    [FieldOffset(0x130)] public float currentHRotation; 
 }

@@ -14,6 +14,7 @@ public unsafe static class UI
 {
     public static SavedZoneState SavedZoneState = null;
     public static Vector3? SavedPos = null;
+    public static string MountFilter = "";
     static int a2 = 0;
     static int a3 = 0;
     static int a4 = 0;
@@ -25,7 +26,7 @@ public unsafe static class UI
     public static void DrawNeo()
     {
         var l = LayoutWorld.Instance()->ActiveLayout;
-        var disableCheckbox = !Utils.CanEnablePlugin(out var DisableReasons);
+        var disableCheckbox = !Utils.CanEnablePlugin(out var DisableReasons) || Svc.Condition[ConditionFlag.Mounted];
         if (disableCheckbox) ImGui.BeginDisabled();
         if (ImGui.Checkbox("Enable Hyperborea", ref P.Enabled))
         {
@@ -47,7 +48,14 @@ public unsafe static class UI
         if (disableCheckbox)
         {
             ImGui.EndDisabled();
-            ImGuiEx.HelpMarker($"Hyperborea cannot be enabled as you are under the following restricted condition(s):\n{DisableReasons.Print("\n")}", ImGuiColors.DalamudOrange);
+            if (!P.Enabled)
+            {
+                ImGuiEx.HelpMarker($"Hyperborea cannot be enabled as you are under the following restricted condition(s):\n{DisableReasons.Print("\n")}", ImGuiColors.DalamudOrange);
+            }
+            else
+            {
+                ImGuiEx.HelpMarker("You must either dismount or revert your state before disabling Hyperborea.", ImGuiColors.DalamudOrange);
+            }
         }
         ImGuiEx.Text("Packet Filter:");
         ImGui.SameLine();
