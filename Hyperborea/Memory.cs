@@ -40,12 +40,29 @@ public unsafe class Memory
     [EzHook("48 89 5C 24 ?? 57 48 83 EC 20 48 8B F9 8B DA 48 81 C1 ?? ?? ?? ?? E8 ?? ?? ?? ?? 84 C0", false)]
     internal EzHook<FinalizeInstanceContent> FinalizeInstanceContentHook;
 
+    internal delegate nint IsFlightProhibited(nint a1);
+    [EzHook("48 89 5C 24 ?? 57 48 83 EC 20 48 8B 1D ?? ?? ?? ?? 48 8B F9 48 85 DB 0F 84 ?? ?? ?? ?? 80 3D", false)]
+    internal EzHook<IsFlightProhibited> IsFlightProhibitedHook;
+
     internal byte* ActiveScene;
 
     public Memory()
     {
         EzSignatureHelper.Initialize(this);
         ActiveScene = (byte*)(((nint)EnvManager.Instance()) + 36);
+    }
+
+    internal nint IsFlightProhibitedDetour(nint a1)
+    {
+        try
+        {
+            if (P.Enabled && C.ForcedFlight) return 0;
+        }
+        catch(Exception e)
+        {
+            e.Log();
+        }
+        return IsFlightProhibitedHook.Original(a1);
     }
 
     private byte FinalizeInstanceContentDetour(nint a1, uint a2)
@@ -115,12 +132,14 @@ public unsafe class Memory
     {
         PacketDispatcher_OnReceivePacketHook.Enable();
         PacketDispatcher_OnSendPacketHook.Enable();
+        IsFlightProhibitedHook.Enable();
     }
 
     public void DisableFirewall()
     {
         PacketDispatcher_OnReceivePacketHook.Pause();
         PacketDispatcher_OnSendPacketHook.Pause();
+        IsFlightProhibitedHook.Pause();
     }
 
     public bool IsFirewallEnabled => PacketDispatcher_OnSendPacketHook.IsEnabled;

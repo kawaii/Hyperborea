@@ -1,11 +1,17 @@
-﻿using ECommons.Automation;
+﻿using Dalamud.Game.ClientState.Keys;
+using Dalamud.Plugin.Services;
+using ECommons.Automation;
 using ECommons.Configuration;
 using ECommons.ExcelServices;
 using ECommons.EzEventManager;
 using ECommons.GameHelpers;
 using ECommons.Hooks;
+using ECommons.Interop;
 using ECommons.SimpleGui;
+using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using Hyperborea.Gui;
 using Lumina.Data;
 using Lumina.Excel.GeneratedSheets;
@@ -33,6 +39,8 @@ public unsafe class Hyperborea : IDalamudPlugin
     public EditorWindow EditorWindow;
     public CompassWindow CompassWindow;
     public ZoneData BuiltInZoneData;
+    public Overlay Overlay;
+    public bool Noclip = false;
 
     public Hyperborea(DalamudPluginInterface pi)
     {
@@ -64,7 +72,77 @@ public unsafe class Hyperborea : IDalamudPlugin
             EditorWindow = new();
             CompassWindow = new();
             Utils.LoadBuiltInZoneData();
+            new EzFrameworkUpdate(Tick);
+            Overlay = new();
         });
+    }
+
+    bool IsLButtonPressed = false;
+    private void Tick()
+    {
+        if(Enabled)
+        {
+            if (C.FastTeleport)
+            {
+                if (!CSFramework.Instance()->WindowInactive && IsKeyPressed([LimitedKeys.LeftControlKey, LimitedKeys.RightControlKey]))
+                {
+                    var pos = ImGui.GetMousePos();
+                    if (Svc.GameGui.ScreenToWorld(pos, out var res))
+                    {
+                        CompassWindow.PlayerPosition = res.ToPoint3();
+                        if (IsKeyPressed(LimitedKeys.LeftMouseButton))
+                        {
+                            if (!IsLButtonPressed)
+                            {
+                                Player.GameObject->SetPosition(res.X, res.Y, res.Z);
+                            }
+                            IsLButtonPressed = true;
+                        }
+                        else
+                        {
+                            IsLButtonPressed = false;
+                        }
+                    }
+                }
+            }
+            if (Noclip && !CSFramework.Instance()->WindowInactive)
+            {
+                if (Svc.KeyState.GetRawValue(VirtualKey.SPACE) != 0 || IsKeyPressed(LimitedKeys.Space))
+                {
+                    Svc.KeyState.SetRawValue(VirtualKey.SPACE, 0);
+                    Player.GameObject->SetPosition(Player.Object.Position.X, Player.Object.Position.Y + C.NoclipSpeed, Player.Object.Position.Z);
+                }
+                if (Svc.KeyState.GetRawValue(VirtualKey.LSHIFT) != 0 || IsKeyPressed(LimitedKeys.LeftShiftKey))
+                {
+                    Svc.KeyState.SetRawValue(VirtualKey.LSHIFT, 0);
+                    Player.GameObject->SetPosition(Player.Object.Position.X, Player.Object.Position.Y - C.NoclipSpeed, Player.Object.Position.Z);
+                }
+                if (Svc.KeyState.GetRawValue(VirtualKey.W) != 0 || IsKeyPressed(LimitedKeys.W))
+                {
+                    var newPoint = Utils.RotatePoint(Player.Object.Position.X, Player.Object.Position.Z, MathF.PI-((CameraEx*)CameraManager.Instance()->GetActiveCamera())->currentHRotation, Player.Object.Position + new Vector3(0, 0, C.NoclipSpeed));
+                    Svc.KeyState.SetRawValue(VirtualKey.W, 0);
+                    Player.GameObject->SetPosition(newPoint.X, newPoint.Y, newPoint.Z);
+                }
+                if (Svc.KeyState.GetRawValue(VirtualKey.S) != 0 || IsKeyPressed(LimitedKeys.S))
+                {
+                    var newPoint = Utils.RotatePoint(Player.Object.Position.X, Player.Object.Position.Z, MathF.PI - ((CameraEx*)CameraManager.Instance()->GetActiveCamera())->currentHRotation, Player.Object.Position + new Vector3(0, 0, -C.NoclipSpeed));
+                    Svc.KeyState.SetRawValue(VirtualKey.S, 0);
+                    Player.GameObject->SetPosition(newPoint.X, newPoint.Y, newPoint.Z);
+                }
+                if (Svc.KeyState.GetRawValue(VirtualKey.A) != 0 || IsKeyPressed(LimitedKeys.A))
+                {
+                    var newPoint = Utils.RotatePoint(Player.Object.Position.X, Player.Object.Position.Z, MathF.PI - ((CameraEx*)CameraManager.Instance()->GetActiveCamera())->currentHRotation, Player.Object.Position + new Vector3(C.NoclipSpeed, 0, 0));
+                    Svc.KeyState.SetRawValue(VirtualKey.A, 0);
+                    Player.GameObject->SetPosition(newPoint.X, newPoint.Y, newPoint.Z);
+                }
+                if (Svc.KeyState.GetRawValue(VirtualKey.D) != 0 || IsKeyPressed(LimitedKeys.D))
+                {
+                    var newPoint = Utils.RotatePoint(Player.Object.Position.X, Player.Object.Position.Z, MathF.PI - ((CameraEx*)CameraManager.Instance()->GetActiveCamera())->currentHRotation, Player.Object.Position + new Vector3(-C.NoclipSpeed, 0, 0));
+                    Svc.KeyState.SetRawValue(VirtualKey.D, 0);
+                    Player.GameObject->SetPosition(newPoint.X, newPoint.Y, newPoint.Z);
+                }
+            }
+        }
     }
 
     private void OnMapEffect(long arg1, uint arg2, ushort arg3, ushort arg4)

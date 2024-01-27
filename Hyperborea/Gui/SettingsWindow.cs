@@ -1,5 +1,6 @@
 ﻿using Dalamud.Interface.Components;
 using ECommons.SimpleGui;
+using Lumina.Excel.GeneratedSheets;
 
 namespace Hyperborea.Gui;
 public class SettingsWindow : Window
@@ -11,6 +12,37 @@ public class SettingsWindow : Window
 
     public override void Draw()
     {
+        if (ImGuiGroup.BeginGroupBox("General settings"))
+        {
+            ImGuiEx.Text($"Mount:");
+            ImGuiEx.SetNextItemFullWidth(-10);
+            if (ImGui.BeginCombo($"##mount", Utils.GetMountName(C.CurrentMount) ?? "Select a mount..."))
+            {
+                ImGuiEx.SetNextItemWidthScaled(150f);
+                ImGui.InputTextWithHint("##search", "Filter", ref UI.MountFilter, 50);
+                if (ImGui.Selectable("No mount"))
+                {
+                    C.CurrentMount = 0;
+                }
+                foreach (var x in Svc.Data.GetExcelSheet<Mount>())
+                {
+                    var name = Utils.GetMountName(x.RowId);
+                    if (!name.IsNullOrEmpty())
+                    {
+                        if (UI.MountFilter.IsNullOrEmpty() || name.Contains(UI.MountFilter, StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (ImGui.Selectable(name))
+                            {
+                                C.CurrentMount = x.RowId;
+                            }
+                        }
+                    }
+                }
+                ImGui.EndCombo();
+            }
+            ImGuiGroup.EndGroupBox();
+        }
+
         if (ImGuiGroup.BeginGroupBox("Danger Zone", EColor.RedBright.ToUint()))
         {
             if (P.Enabled) ImGui.BeginDisabled();
@@ -23,5 +55,7 @@ public class SettingsWindow : Window
             }
             ImGuiGroup.EndGroupBox();
         }
+
+        
     }
 }
