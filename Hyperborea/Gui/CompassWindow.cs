@@ -1,5 +1,6 @@
 ﻿using ECommons.GameHelpers;
 using ECommons.SimpleGui;
+using ECommons.Throttlers;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using Lumina.Excel.GeneratedSheets;
 using System;
@@ -12,6 +13,7 @@ namespace Hyperborea.Gui;
 public unsafe class CompassWindow : Window
 {
     public Point3 PlayerPosition = new();
+    string FestFilter = "";
 
     public CompassWindow() : base("Hyperborea Compass", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize)
     {
@@ -39,7 +41,7 @@ public unsafe class CompassWindow : Window
             var phase = Utils.GetPhase(Svc.ClientState.TerritoryType);
             var index = array.IndexOf(phase);
 
-            ImGuiEx.SetNextItemWidthScaled(250f);
+            ImGui.SetNextItemWidth(250f);
             if(ImGui.BeginCombo("##selphase", $"{phase?.Name.NullWhenEmpty() ?? "Select phase"}"))
             {
                 foreach(var x in array)
@@ -105,10 +107,10 @@ public unsafe class CompassWindow : Window
             ImGui.PopFont();
             ImGuiEx.Tooltip("Enables CTRL + click to teleport to mouse cursor location."); 
 
-            ImGuiEx.SetNextItemWidthScaled(200f);
+            ImGui.SetNextItemWidth(200f);
             if(ImGui.BeginCombo($"##mount", Utils.GetMountName(C.CurrentMount) ?? "Select a mount..."))
             {
-                ImGuiEx.SetNextItemWidthScaled(150f);
+                ImGui.SetNextItemWidth(150f);
                 ImGui.InputTextWithHint("##search", "Filter", ref UI.MountFilter, 50);
                 if (ImGui.Selectable("No mount"))
                 {
@@ -150,10 +152,43 @@ public unsafe class CompassWindow : Window
             if (P.Noclip)
             {
                 ImGui.SameLine();
-                ImGuiEx.SetNextItemWidthScaled(100f);
+                ImGui.SetNextItemWidth(100f);
                 ImGuiEx.SliderFloat("##speed", ref C.NoclipSpeed, 0.05f, 0.5f);
                 C.ForcedFlight = false;
             }
+
+            ImGui.SetNextItemWidth(250f);
+            var fests = P.SelectedFestivals.Select(x => P.FestivalDatas.FirstOrDefault(z => z.Id == x).Name).Join(", ");
+            if (ImGui.BeginCombo("##fest", fests.IsNullOrEmpty()? "Select festivals...":fests))
+            {
+                ImGui.SetNextItemWidth(150f);
+                ImGui.InputTextWithHint($"##fltr1", "Search", ref FestFilter, 50);
+                ImGui.SameLine();
+                if(ImGui.Button("Deselect All"))
+                {
+                    P.SelectedFestivals.Clear();
+                    P.ApplyFestivals();
+                }
+                foreach(var x in P.FestivalDatas)
+                {
+                    if (x.Unsafe) continue;
+                    if (FestFilter != "" && !x.Name.Contains(FestFilter, StringComparison.OrdinalIgnoreCase)) continue;
+                    var disabled = !P.SelectedFestivals.Contains(x.Id) && P.SelectedFestivals.Count >= 4;
+                    if (disabled) ImGui.BeginDisabled();
+                    ImGuiEx.CollectionCheckbox($"{x.Name}##{x.Id}", x.Id, P.SelectedFestivals);
+                    if (disabled) ImGui.EndDisabled();
+                }
+                ImGui.EndCombo();
+            }
+            var disabled2 = !EzThrottler.Check("ApplyFestival");
+            if (disabled2) ImGui.BeginDisabled();
+            ImGui.SameLine();
+            if (ImGui.Button("Apply"))
+            {
+                P.ApplyFestivals();
+                EzThrottler.Throttle("ApplyFestival", 2000, true);
+            }
+            if (disabled2) ImGui.EndDisabled();
         }
     }
 }

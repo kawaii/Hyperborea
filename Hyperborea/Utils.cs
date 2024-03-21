@@ -263,6 +263,7 @@ public unsafe static class Utils
 
         P.Memory.LoadZoneDetour((nint)GameMain.Instance(), territory, a3, (byte)a4, (byte)a5, (byte)a6);
         P.Memory.SetupTerritoryType(EventFramework.Instance(), (ushort)territory);
+        P.TaskManager.Enqueue(P.ApplyFestivals);
         var level = Svc.Data.GetExcelSheet<TerritoryType>().GetRow(territory)?.Bg?.ExtractText();
         if(!level.IsNullOrEmpty() && Utils.TryGetZoneInfo(level, out var value))
         {

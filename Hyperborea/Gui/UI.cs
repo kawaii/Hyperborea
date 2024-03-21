@@ -115,7 +115,7 @@ public unsafe static class UI
                 Utils.TryGetZoneInfo(layout, out info);
 
                 var cur = ImGui.GetCursorPos();
-                ImGui.SetCursorPosX(ImGuiEx.GetWindowContentRegionWidth() - ImGuiHelpers.GetButtonSize("Browse").X - ImGuiHelpers.GetButtonSize("Zone Editor").X - 50f.Scale());
+                ImGui.SetCursorPosX(ImGuiEx.GetWindowContentRegionWidth() - ImGuiHelpers.GetButtonSize("Browse").X - ImGuiHelpers.GetButtonSize("Zone Editor").X - 50f);
                 if (ImGuiComponents.IconButtonWithText((FontAwesomeIcon)0xf002, "Browse"))
                 {
                     new TerritorySelector((uint)a2, (sel, x) =>
@@ -132,7 +132,7 @@ public unsafe static class UI
 
                 ImGui.SetCursorPos(cur);
                 ImGuiEx.TextV("Zone Data:");
-                ImGuiEx.SetNextItemWidthScaled(150);
+                ImGui.SetNextItemWidth(150);
                 var dis = TerritorySelector.Selectors.Any(x => x.IsOpen);
                 if (dis) ImGui.BeginDisabled();
                 ImGui.InputInt("Territory Type ID", ref a2);
@@ -142,7 +142,7 @@ public unsafe static class UI
                     ImGuiEx.Text(ExcelTerritoryHelper.GetName((uint)a2));
                 }
                 ImGuiEx.Text($"Additional Data:");
-                ImGuiEx.SetNextItemWidthScaled(150);
+                ImGui.SetNextItemWidth(150);
                 var StoryValues = Utils.GetStoryValues((uint)a2);
                 var disableda3 = !StoryValues.Any(x => x != 0);
                 if (disableda3) ImGui.BeginDisabled();
@@ -157,9 +157,9 @@ public unsafe static class UI
                 }
                 if (disableda3) ImGui.EndDisabled();
                 if (!StoryValues.Contains((uint)a3)) a3 = (int)StoryValues.FirstOrDefault();
-                ImGuiEx.SetNextItemWidthScaled(150);
+                ImGui.SetNextItemWidth(150);
                 ImGui.InputInt("Argument 4", ref a4);
-                ImGuiEx.SetNextItemWidthScaled(150);
+                ImGui.SetNextItemWidth(150);
                 ImGui.InputInt("Argument 5", ref a5);
 
                 ImGui.Checkbox($"Spawn Override:", ref SpawnOverride);
@@ -244,7 +244,7 @@ public unsafe static class UI
     {
         ImGuiEx.TextV(t);
         ImGui.SameLine();
-        ImGuiEx.SetNextItemWidthScaled(60f);
+        ImGui.SetNextItemWidth(60f);
         ImGui.DragFloat("##" + t, ref p, 0.1f);
     }
 }
