@@ -18,7 +18,7 @@ public class SettingsWindow : Window
             ImGuiEx.SetNextItemFullWidth(-10);
             if (ImGui.BeginCombo($"##mount", Utils.GetMountName(C.CurrentMount) ?? "Select a mount..."))
             {
-                ImGuiEx.SetNextItemWidthScaled(150f);
+                ImGui.SetNextItemWidth(150f);
                 ImGui.InputTextWithHint("##search", "Filter", ref UI.MountFilter, 50);
                 if (ImGui.Selectable("No mount"))
                 {

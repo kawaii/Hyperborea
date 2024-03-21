@@ -35,10 +35,33 @@ public unsafe class DebugWindow: Window
         P.SaveZoneData();
     }
 
+    int[] ints = new int[100];
     uint[] d = new uint[100];
     long[] longs = new long[100];
     void DrawDebug()
     {
+
+        {
+            var l = LayoutWorld.Instance()->ActiveLayout;
+            if(l != null)
+            {
+                ImGuiEx.Text($"{l->FestivalStatus:X8}");
+                ImGuiEx.Text($"{l->ActiveFestivals[0]}");
+                ImGuiEx.Text($"{l->ActiveFestivals[1]}");
+                ImGuiEx.Text($"{l->ActiveFestivals[2]}");
+                ImGuiEx.Text($"{l->ActiveFestivals[3]}");
+                ImGui.InputInt("fest 0", ref ints[0]);
+                ImGui.InputInt("fest 1", ref ints[1]);
+                ImGui.InputInt("fest 2", ref ints[2]);
+                ImGui.InputInt("fest 3", ref ints[3]);
+                if (ImGui.Button("Set festivals"))
+                {
+                    var s = stackalloc uint[] { (uint)ints[0], (uint)ints[1], (uint)ints[2], (uint)ints[3] };
+                    l->SetActiveFestivals(s);
+                }
+            }
+        }
+
         ImGui.Checkbox($"Bypass all restrictions", ref P.Bypass);
         if(ImGui.Button("Fill phases based on supported weather"))
         {

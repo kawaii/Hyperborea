@@ -2,11 +2,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Authors>kawaii</Authors>
-        <Version>1.0.0.8</Version>
+        <Version>1.0.0.9</Version>
     </PropertyGroup>
 
     <PropertyGroup>
-        <TargetFramework>net7.0-windows</TargetFramework>
+        <TargetFramework>net8.0-windows</TargetFramework>
         <Platforms>x64</Platforms>
         <LangVersion>preview</LangVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -74,6 +74,9 @@
 
     <ItemGroup>
       <None Update="data.yaml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="festivals.yaml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

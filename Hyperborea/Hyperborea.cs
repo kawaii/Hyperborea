@@ -11,6 +11,7 @@ using ECommons.SimpleGui;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using Hyperborea.Gui;
 using Lumina.Data;
@@ -41,6 +42,8 @@ public unsafe class Hyperborea : IDalamudPlugin
     public ZoneData BuiltInZoneData;
     public Overlay Overlay;
     public bool Noclip = false;
+    public FestivalData[] FestivalDatas;
+    public List<int> SelectedFestivals = [];
 
     public Hyperborea(DalamudPluginInterface pi)
     {
@@ -74,6 +77,7 @@ public unsafe class Hyperborea : IDalamudPlugin
             Utils.LoadBuiltInZoneData();
             new EzFrameworkUpdate(Tick);
             Overlay = new();
+            FestivalDatas = EzConfig.DefaultSerializationFactory.Deserialize<FestivalData[]>(File.ReadAllText(Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName, "festivals.yaml")));
         });
     }
 
@@ -212,6 +216,20 @@ public unsafe class Hyperborea : IDalamudPlugin
         else
         {
             EzConfigGui.Open();
+        }
+    }
+
+    public void ApplyFestivals()
+    {
+        var festivalArray = stackalloc uint[] { 0, 0, 0, 0 };
+        for (int i = 0; i < Math.Min(4, SelectedFestivals.Count); i++)
+        {
+            festivalArray[i] = (uint)SelectedFestivals[i];
+        }
+        var l = LayoutWorld.Instance()->ActiveLayout;
+        if(l != null)
+        {
+            l->SetActiveFestivals(festivalArray);
         }
     }
 
