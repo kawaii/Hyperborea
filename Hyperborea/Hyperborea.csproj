@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Authors>kawaii</Authors>
-        <Version>1.0.0.10</Version>
+        <Version>1.0.0.11</Version>
     </PropertyGroup>
 
     <PropertyGroup>
