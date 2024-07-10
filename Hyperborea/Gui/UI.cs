@@ -7,6 +7,9 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using Lumina.Excel.GeneratedSheets;
+using Hyperborea.Services;
+using ECommons.ChatMethods;
+using ECommons.Throttlers;
 
 namespace Hyperborea.Gui;
 
@@ -25,6 +28,22 @@ public unsafe static class UI
 
     public static void DrawNeo()
     {
+        if(!P.AllowedOperation)
+        {
+            ImGuiEx.Text(EColor.RedBright, $"For this version, no opcodes are found. Please wait until they are available again.");
+            if(ImGuiEx.Button("Try updating opcodes", EzThrottler.Check("Opcode")))
+            {
+                EzThrottler.Throttle("Opcode", 60000, true);
+                S.ThreadPool.Run(S.OpcodeUpdater.RunForCurrentVersion, (x) =>
+                {
+                    if(x != null)
+                    {
+                        ChatPrinter.Red($"Error updating opcodes: \n{x.Message}");
+                    }
+                });
+            }
+            return;
+        }
         var l = LayoutWorld.Instance()->ActiveLayout;
         var disableCheckbox = !Utils.CanEnablePlugin(out var DisableReasons) || Svc.Condition[ConditionFlag.Mounted];
         if (disableCheckbox) ImGui.BeginDisabled();

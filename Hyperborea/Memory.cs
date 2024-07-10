@@ -22,7 +22,7 @@ public unsafe class Memory
     internal EzHook<PacketDispatcher_OnReceivePacket> PacketDispatcher_OnReceivePacketMonitorHook;
 
     internal delegate byte PacketDispatcher_OnSendPacket(nint a1, nint a2, nint a3, byte a4);
-    [EzHook("48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC 70 8B 81 ?? ?? ?? ??", false)]
+    [EzHook("48 89 5C 24 ?? 48 89 74 24 ?? 4C 89 64 24 ?? 55 41 56 41 57 48 8B EC 48 83 EC 70", false)]
     internal EzHook<PacketDispatcher_OnSendPacket> PacketDispatcher_OnSendPacketHook;
 
     internal delegate nint TargetSystem_InteractWithObject(nint a1, nint a2, byte a3);
@@ -30,7 +30,7 @@ public unsafe class Memory
     internal EzHook<TargetSystem_InteractWithObject> TargetSystem_InteractWithObjectHook;
 
     internal delegate nint SetupTerritoryTypeDelegate(void* EventFramework, ushort territoryType);
-    internal SetupTerritoryTypeDelegate SetupTerritoryType = EzDelegate.Get<SetupTerritoryTypeDelegate>("48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC 20 48 8B F9 66 89 91");
+    internal SetupTerritoryTypeDelegate SetupTerritoryType = EzDelegate.Get<SetupTerritoryTypeDelegate>("48 89 5C 24 ?? 48 89 6C 24 ?? 57 48 83 EC 20 0F B7 DA");
 
     internal delegate nint SetupInstanceContent(nint a1, uint a2, uint a3, uint a4);
     [EzHook("48 89 5C 24 ?? 57 48 83 EC 20 48 8B F9 48 81 C1 ?? ?? ?? ?? E8 ?? ?? ?? ?? E8", false)]
@@ -132,14 +132,14 @@ public unsafe class Memory
     {
         PacketDispatcher_OnReceivePacketHook.Enable();
         PacketDispatcher_OnSendPacketHook.Enable();
-        IsFlightProhibitedHook.Enable();
+        IsFlightProhibitedHook?.Enable();
     }
 
     public void DisableFirewall()
     {
         PacketDispatcher_OnReceivePacketHook.Pause();
         PacketDispatcher_OnSendPacketHook.Pause();
-        IsFlightProhibitedHook.Pause();
+        IsFlightProhibitedHook?.Pause();
     }
 
     public bool IsFirewallEnabled => PacketDispatcher_OnSendPacketHook.IsEnabled;
@@ -158,15 +158,14 @@ public unsafe class Memory
         {
             var opcode = *(ushort*)a2;
 
-            switch (opcode)
+            if (C.OpcodesZoneUp.Contains(opcode))
             {
-                case 686:
-                    PluginLog.Verbose($"[HyperFirewall] Passing outgoing packet with opcode {opcode} through.");
-                    return PacketDispatcher_OnSendPacketHook.Original(a1, a2, a3, a4);
-
-                default:
-                    PluginLog.Verbose($"[HyperFirewall] Suppressing outgoing packet with opcode {opcode}.");
-                    break;
+                PluginLog.Verbose($"[HyperFirewall] Passing outgoing packet with opcode {opcode} through.");
+                return PacketDispatcher_OnSendPacketHook.Original(a1, a2, a3, a4);
+            }
+            else
+            {
+                PluginLog.Verbose($"[HyperFirewall] Suppressing outgoing packet with opcode {opcode}.");
             }
         }
         catch (Exception e)
@@ -191,17 +190,14 @@ public unsafe class Memory
         {
             var opcode = *(ushort*)(a3 + 2);
 
-            switch (opcode)
+            if (C.OpcodesZoneDown.Contains(opcode))
             {
-                case 473:
-                case 605:
-                    PluginLog.Verbose($"[HyperFirewall] Passing incoming packet with opcode {opcode} through.");
-                    PacketDispatcher_OnReceivePacketHook.Original(a1, a2, a3);
-                    return;
-
-                default:
-                    PluginLog.Verbose($"[HyperFirewall] Suppressing incoming packet with opcode {opcode}.");
-                    break;
+                PluginLog.Verbose($"[HyperFirewall] Passing incoming packet with opcode {opcode} through.");
+                PacketDispatcher_OnReceivePacketHook.Original(a1, a2, a3);
+            }
+            else
+            {
+                PluginLog.Verbose($"[HyperFirewall] Suppressing incoming packet with opcode {opcode}.");
             }
         }
         catch (Exception e)

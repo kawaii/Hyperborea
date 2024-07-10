@@ -57,7 +57,7 @@ public unsafe class DebugWindow: Window
                 if (ImGui.Button("Set festivals"))
                 {
                     var s = stackalloc uint[] { (uint)ints[0], (uint)ints[1], (uint)ints[2], (uint)ints[3] };
-                    l->SetActiveFestivals(s);
+                    l->SetActiveFestivals((FFXIVClientStructs.FFXIV.Client.Game.GameMain.Festival*)s);
                 }
             }
         }

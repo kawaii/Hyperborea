@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Keys;
 using Dalamud.Plugin.Services;
 using ECommons.Automation;
+using ECommons.Automation.LegacyTaskManager;
 using ECommons.Configuration;
 using ECommons.ExcelServices;
 using ECommons.EzEventManager;
@@ -8,12 +9,14 @@ using ECommons.GameHelpers;
 using ECommons.Hooks;
 using ECommons.Interop;
 using ECommons.SimpleGui;
+using ECommons.Singletons;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using Hyperborea.Gui;
+using Hyperborea.Services;
 using Lumina.Data;
 using Lumina.Excel.GeneratedSheets;
 using System.IO;
@@ -44,8 +47,9 @@ public unsafe class Hyperborea : IDalamudPlugin
     public bool Noclip = false;
     public FestivalData[] FestivalDatas;
     public List<int> SelectedFestivals = [];
+    public bool AllowedOperation = false;
 
-    public Hyperborea(DalamudPluginInterface pi)
+    public Hyperborea(IDalamudPluginInterface pi)
     {
         P = this;
         ECommonsMain.Init(pi, P);
@@ -78,6 +82,7 @@ public unsafe class Hyperborea : IDalamudPlugin
             new EzFrameworkUpdate(Tick);
             Overlay = new();
             FestivalDatas = EzConfig.DefaultSerializationFactory.Deserialize<FestivalData[]>(File.ReadAllText(Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName, "festivals.yaml")));
+            SingletonServiceManager.Initialize(typeof(S));
         });
     }
 
@@ -229,7 +234,7 @@ public unsafe class Hyperborea : IDalamudPlugin
         var l = LayoutWorld.Instance()->ActiveLayout;
         if(l != null)
         {
-            l->SetActiveFestivals(festivalArray);
+            l->SetActiveFestivals((GameMain.Festival*)festivalArray);
         }
     }
 
