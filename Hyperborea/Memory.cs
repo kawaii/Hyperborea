@@ -33,15 +33,15 @@ public unsafe class Memory
     internal SetupTerritoryTypeDelegate SetupTerritoryType = EzDelegate.Get<SetupTerritoryTypeDelegate>("48 89 5C 24 ?? 48 89 6C 24 ?? 57 48 83 EC 20 0F B7 DA");
 
     internal delegate nint SetupInstanceContent(nint a1, uint a2, uint a3, uint a4);
-    [EzHook("48 89 5C 24 ?? 57 48 83 EC 20 48 8B F9 48 81 C1 ?? ?? ?? ?? E8 ?? ?? ?? ?? E8", false)]
+    [EzHook("E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 54 24 70 48 8B C8 E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 0F B6 54 24", true)]
     internal EzHook<SetupInstanceContent> SetupInstanceContentHook;
 
     internal delegate byte FinalizeInstanceContent(nint a1, uint a2);
-    [EzHook("48 89 5C 24 ?? 57 48 83 EC 20 48 8B F9 8B DA 48 81 C1 ?? ?? ?? ?? E8 ?? ?? ?? ?? 84 C0", false)]
+    [EzHook("48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 83 EC 70 48 8D B1", false)]
     internal EzHook<FinalizeInstanceContent> FinalizeInstanceContentHook;
 
-    internal delegate nint IsFlightProhibited(nint a1);
-    [EzHook("48 89 5C 24 ?? 57 48 83 EC 20 48 8B 1D ?? ?? ?? ?? 48 8B F9 48 85 DB 0F 84 ?? ?? ?? ?? 80 3D", false)]
+    internal delegate nint IsFlightProhibited();
+    [EzHook("40 53 48 83 EC 20 48 8B 1D ?? ?? ?? ?? 48 85 DB 0F 84 ?? ?? ?? ?? 80 3D", false)]
     internal EzHook<IsFlightProhibited> IsFlightProhibitedHook;
 
     internal byte* ActiveScene;
@@ -52,7 +52,7 @@ public unsafe class Memory
         ActiveScene = (byte*)(((nint)EnvManager.Instance()) + 36);
     }
 
-    internal nint IsFlightProhibitedDetour(nint a1)
+    internal nint IsFlightProhibitedDetour()
     {
         try
         {
@@ -62,7 +62,7 @@ public unsafe class Memory
         {
             e.Log();
         }
-        return IsFlightProhibitedHook.Original(a1);
+        return IsFlightProhibitedHook.Original();
     }
 
     private byte FinalizeInstanceContentDetour(nint a1, uint a2)
@@ -75,7 +75,7 @@ public unsafe class Memory
     {
         try
         {
-            InternalLog.Debug($"SetupInstanceContentDetour: {a2:X8}, {a3}, {a4}");
+            PluginLog.Debug($"SetupInstanceContentDetour: {a2:X8}, {a3}, {a4}");
             var l = LayoutWorld.Instance()->ActiveLayout;
             if (l != null)
             {
