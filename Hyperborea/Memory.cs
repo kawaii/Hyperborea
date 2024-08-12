@@ -11,7 +11,7 @@ namespace Hyperborea;
 public unsafe class Memory
 {
     internal delegate nint LoadZone(nint a1, uint a2, int a3, byte a4, byte a5, byte a6);
-    [EzHook("40 55 56 57 41 56 41 57 48 83 EC 50 48 8B F9")]
+    [EzHook("40 55 56 57 41 56 41 57 48 83 EC 50 48 8B F9", false)]
     internal EzHook<LoadZone> LoadZoneHook;
 
     const string PacketDispatcher_OnReceivePacketHookSig = "40 53 56 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? 8B F2";
