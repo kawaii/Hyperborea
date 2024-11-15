@@ -6,7 +6,7 @@ using ECommons.SimpleGui;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System.Windows.Forms;
 
 namespace Hyperborea.Gui;
@@ -133,7 +133,7 @@ public unsafe class DebugWindow: Window
         }
 
         if (ImGui.CollapsingHeader("Story"))
-        {
+        {/*
             foreach (var x in Svc.Data.GetExcelSheet<Story>())
             {
                 ImGuiEx.Text($"{x.RowId} {ExcelTerritoryHelper.GetName(x.LayerSetTerritoryType0?.Value?.RowId ?? 0, true)}:");
@@ -141,11 +141,11 @@ public unsafe class DebugWindow: Window
                 {
                     ImGuiEx.Text($"  LayerSet0: {i} = {x.LayerSet0[i]}");
                 }
-            }
+            }*/
         }
 
         if (ImGui.CollapsingHeader("Story1"))
-        {
+        {/*
             foreach (var x in Svc.Data.GetExcelSheet<Story>())
             {
                 ImGuiEx.Text($"{x.RowId} {ExcelTerritoryHelper.GetName(x.LayerSetTerritoryType1?.Value?.RowId ?? 0, true)}:");
@@ -153,7 +153,7 @@ public unsafe class DebugWindow: Window
                 {
                     ImGuiEx.Text($"  LayerSet1: {i} = {x.LayerSet1[i]}");
                 }
-            }
+            }*/
         }
 
     }

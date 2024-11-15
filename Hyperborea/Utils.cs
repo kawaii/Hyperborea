@@ -10,7 +10,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using Hyperborea.Gui;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System.Globalization;
 using System.IO;
 
@@ -40,7 +40,7 @@ public unsafe static class Utils
     public static string GetMountName(uint id)
     {
         if (id == 0) return null;
-        return Svc.Data.GetExcelSheet<Mount>().GetRow(id)?.Singular?.ExtractText();
+        return Svc.Data.GetExcelSheet<Mount>().GetRowOrDefault(id)?.Singular.ExtractText();
     }
 
     public static void LoadBuiltInZoneData()
@@ -93,7 +93,7 @@ public unsafe static class Utils
         if(!StoryValues.TryGetValue(territoryType, out var value))
         {
             value = [0];
-            foreach (var x in Svc.Data.GetExcelSheet<Story>())
+            /*foreach (var x in Svc.Data.GetExcelSheet<Story>())
             {
                 if (x.LayerSetTerritoryType0.Row == territoryType)
                 {
@@ -102,7 +102,7 @@ public unsafe static class Utils
                         value.Add(x.LayerSet0[i]);
                     }
                 }
-            }
+            }*/
             StoryValues[territoryType] = value;
         }
         return StoryValues[territoryType];
@@ -111,7 +111,7 @@ public unsafe static class Utils
     public static string GetWeatherName(uint id)
     {
         if (id == 0) return "Not defined";
-        return Svc.Data.GetExcelSheet<Weather>().GetRow((uint)id)?.Name?.ToString() ?? $"#{id}";
+        return Svc.Data.GetExcelSheet<Weather>().GetRowOrDefault((uint)id)?.Name.ToString() ?? $"#{id}";
     }
 
     public static nint GetMapEffectModule()
@@ -130,7 +130,7 @@ public unsafe static class Utils
             reasons.Add("LocalPlayer Missing (Not logged in");
             ret = false;
         }
-        else if(Svc.Data.GetExcelSheet<TerritoryType>().GetRow(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse != (byte)TerritoryIntendedUseEnum.Inn && !C.DisableInnCheck)
+        else if(Svc.Data.GetExcelSheet<TerritoryType>().GetRowOrDefault(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse.RowId != (byte)TerritoryIntendedUseEnum.Inn && !C.DisableInnCheck)
         {
             reasons.Add("Zone Restriction Active (Must be in an inn room)");
             ret = false;
@@ -149,7 +149,7 @@ public unsafe static class Utils
 
     public static string GetLayout(uint territoryType)
     {
-        var bg = Svc.Data.GetExcelSheet<TerritoryType>().GetRow(territoryType)?.Bg?.ExtractText();
+        var bg = Svc.Data.GetExcelSheet<TerritoryType>().GetRowOrDefault(territoryType)?.Bg.ExtractText();
         return bg;
     }
     public static string GetLayout() => GetLayout(Svc.ClientState.TerritoryType);
@@ -209,11 +209,11 @@ public unsafe static class Utils
     public static (List<byte> WeatherList, string EnvbFile) ParseLvb(ushort id)
     {
         var weathers = new List<byte>();
-        var territoryType = Svc.Data.GetExcelSheet<TerritoryType>().GetRow(id);
+        var territoryType = Svc.Data.GetExcelSheet<TerritoryType>().GetRowOrDefault(id);
         if (territoryType == null) return default;
         try
         {
-            var file = Svc.Data.GetFile<LvbFile>($"bg/{territoryType.Bg}.lvb");
+            var file = Svc.Data.GetFile<LvbFile>($"bg/{territoryType.Value.Bg}.lvb");
             if (file?.weatherIds == null || file.weatherIds.Length == 0)
                 return (null, null);
             foreach (var weather in file.weatherIds)
@@ -240,7 +240,7 @@ public unsafe static class Utils
         return IsInInnInternal();
     }
     
-    public static bool IsInInnInternal() => Svc.Data.GetExcelSheet<TerritoryType>().GetRow(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse == (uint) TerritoryIntendedUseEnum.Inn;
+    public static bool IsInInnInternal() => Svc.Data.GetExcelSheet<TerritoryType>().GetRowOrDefault(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse.RowId == (uint) TerritoryIntendedUseEnum.Inn;
 
     internal static uint? InstanceContentWasLoaded = null;
     public static void LoadZone(uint territory, bool setPosition, bool setPhase, int a3 = 0, int a4 = 0, int a5 = 1, int a6 = 1, int cfcOverride = 0)
@@ -254,7 +254,7 @@ public unsafe static class Utils
         {
             x.Struct()->DisableDraw();
         }
-        var content = ExcelTerritoryHelper.Get((uint)territory).ContentFinderCondition?.Value?.Content;
+        var content = ExcelTerritoryHelper.Get((uint)territory)?.ContentFinderCondition.ValueNullable?.Content.RowId;
         if(cfcOverride != 0) content = (ushort?)cfcOverride;
         if (content != null && content != 0)
         {
@@ -265,7 +265,7 @@ public unsafe static class Utils
         P.Memory.LoadZoneDetour((nint)GameMain.Instance(), territory, a3, (byte)a4, (byte)a5, (byte)a6);
         P.Memory.SetupTerritoryType(EventFramework.Instance(), (ushort)territory);
         P.TaskManager.Enqueue(P.ApplyFestivals);
-        var level = Svc.Data.GetExcelSheet<TerritoryType>().GetRow(territory)?.Bg?.ExtractText();
+        var level = Svc.Data.GetExcelSheet<TerritoryType>().GetRowOrDefault(territory)?.Bg.ExtractText();
         if(!level.IsNullOrEmpty() && Utils.TryGetZoneInfo(level, out var value))
         {
             if (setPosition && value.Spawn != null)

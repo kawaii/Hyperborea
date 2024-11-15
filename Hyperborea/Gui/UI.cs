@@ -6,7 +6,7 @@ using ECommons.ImGuiMethods.TerritorySelection;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using Hyperborea.Services;
 using ECommons.ChatMethods;
 using ECommons.Throttlers;

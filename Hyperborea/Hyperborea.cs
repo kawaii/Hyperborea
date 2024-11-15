@@ -18,7 +18,7 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using Hyperborea.Gui;
 using Hyperborea.Services;
 using Lumina.Data;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System.IO;
 
 namespace Hyperborea;

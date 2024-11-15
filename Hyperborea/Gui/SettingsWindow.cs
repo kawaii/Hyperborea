@@ -1,6 +1,6 @@
 ﻿using Dalamud.Interface.Components;
 using ECommons.SimpleGui;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace Hyperborea.Gui;
 public class SettingsWindow : Window

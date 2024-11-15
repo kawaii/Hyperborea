@@ -4,7 +4,7 @@ using ECommons.ExcelServices;
 using ECommons.EzHookManager;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System.Net.NetworkInformation;
 
 namespace Hyperborea;
@@ -30,7 +30,7 @@ public unsafe class Memory
     internal EzHook<TargetSystem_InteractWithObject> TargetSystem_InteractWithObjectHook;
 
     internal delegate nint SetupTerritoryTypeDelegate(void* EventFramework, ushort territoryType);
-    internal SetupTerritoryTypeDelegate SetupTerritoryType = EzDelegate.Get<SetupTerritoryTypeDelegate>("48 89 5C 24 ?? 48 89 6C 24 ?? 57 48 83 EC 20 0F B7 DA");
+    internal SetupTerritoryTypeDelegate SetupTerritoryType = EzDelegate.Get<SetupTerritoryTypeDelegate>("48 89 5C 24 ?? 48 89 7C 24 ?? 41 56 48 83 EC ?? 48 8B D9 48 89 6C 24");
 
     internal delegate nint SetupInstanceContent(nint a1, uint a2, uint a3, uint a4);
     [EzHook("E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 8B 54 24 70 48 8B C8 E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? E8 ?? ?? ?? ?? 0F B6 54 24", true)]
@@ -80,7 +80,7 @@ public unsafe class Memory
             if (l != null)
             {
                 var obj = l->TerritoryTypeId;
-                var level = Svc.Data.GetExcelSheet<TerritoryType>().GetRow(obj)?.Bg?.ExtractText();
+                var level = Svc.Data.GetExcelSheet<TerritoryType>().GetRowOrDefault(obj)?.Bg.ExtractText();
                 if (!level.IsNullOrEmpty())
                 {
                     if (Utils.TryGetZoneInfo(level, out var info))

@@ -21,4 +21,4 @@ global using Dalamud.Game.ClientState.Conditions;
 global using CSFramework = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework;
 global using ECommons.DalamudServices.Legacy;
 global using Dalamud.Interface.Utility;
-global using LAction = Lumina.Excel.GeneratedSheets.Action;
+global using LAction = Lumina.Excel.Sheets.Action;

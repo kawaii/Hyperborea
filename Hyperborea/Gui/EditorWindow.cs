@@ -5,7 +5,7 @@ using ECommons.GameHelpers;
 using ECommons.ImGuiMethods.TerritorySelection;
 using ECommons.SimpleGui;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +23,7 @@ public unsafe class EditorWindow : Window
         EzConfigGui.WindowSystem.AddWindow(this);
         foreach(var x in Svc.Data.GetExcelSheet<TerritoryType>())
         {
-            var bg = x.GetBG();
+            var bg = ((TerritoryType?)x).GetBG();
             if (!bg.IsNullOrEmpty())
             {
                 if(!BgToTerritoryType.TryGetValue(bg, out var list))
