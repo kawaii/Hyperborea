@@ -243,7 +243,7 @@ public unsafe static class Utils
     public static bool IsInInnInternal() => Svc.Data.GetExcelSheet<TerritoryType>().GetRow(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse == (uint) TerritoryIntendedUseEnum.Inn;
 
     internal static uint? InstanceContentWasLoaded = null;
-    public static void LoadZone(uint territory, bool setPosition, bool setPhase, int a3 = 0, int a4 = 0, int a5 = 1, int a6 = 1)
+    public static void LoadZone(uint territory, bool setPosition, bool setPhase, int a3 = 0, int a4 = 0, int a5 = 1, int a6 = 1, int cfcOverride = 0)
     {
         if(InstanceContentWasLoaded != null)
         {
@@ -255,6 +255,7 @@ public unsafe static class Utils
             x.Struct()->DisableDraw();
         }
         var content = ExcelTerritoryHelper.Get((uint)territory).ContentFinderCondition?.Value?.Content;
+        if(cfcOverride != 0) content = (ushort?)cfcOverride;
         if (content != null && content != 0)
         {
             P.Memory.SetupInstanceContentHook.Original((nint)EventFramework.Instance(), 0x80030000 + content.Value, content.Value, 0);

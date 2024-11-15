@@ -25,6 +25,7 @@ public unsafe static class UI
     internal static int a6 = 1;
     static Point3 Position = new(0,0,0);
     static bool SpawnOverride;
+    static int CFCOverride = 0;
 
     public static void DrawNeo()
     {
@@ -180,6 +181,8 @@ public unsafe static class UI
                 ImGui.InputInt("Argument 4", ref a4);
                 ImGui.SetNextItemWidth(150);
                 ImGui.InputInt("Argument 5", ref a5);
+                ImGui.SetNextItemWidth(150);
+                ImGui.InputInt("CFC Override", ref CFCOverride);
 
                 ImGui.Checkbox($"Spawn Override:", ref SpawnOverride);
                 if (!SpawnOverride) ImGui.BeginDisabled();
@@ -229,7 +232,7 @@ public unsafe static class UI
                     {
                         Utils.TryGetZoneInfo(Utils.GetLayout((uint)a2), out var info2);
                         SavedZoneState ??= new SavedZoneState(l->TerritoryTypeId, Player.Object.Position);
-                        Utils.LoadZone((uint)a2, !SpawnOverride, true, a3, a4, a5, a6);
+                        Utils.LoadZone((uint)a2, !SpawnOverride, true, a3, a4, a5, a6, CFCOverride);
                         if (SpawnOverride)
                         {
                             Player.GameObject->SetPosition(Position.X, Position.Y, Position.Z);
