@@ -11,11 +11,11 @@ namespace Hyperborea.Services.OpcodeUpdaterService;
 public unsafe class OpcodeUpdater : IDisposable
 {
     volatile bool Disposed = false;
+    public string CurrentVersion => $"{CSFramework.Instance()->GameVersionString}_{P.GetType().Assembly.GetName().Version}";
 
     private OpcodeUpdater()
     {
-        var v = CSFramework.Instance()->GameVersionString;
-        if (v == C.GameVersion)
+        if (CurrentVersion == C.GameVersion)
         {
             PluginLog.Information("No opcode update required");
             P.AllowedOperation = true;
@@ -30,10 +30,10 @@ public unsafe class OpcodeUpdater : IDisposable
     public void RunForCurrentVersion()
     {
         var v = CSFramework.Instance()->GameVersionString;
-        S.ThreadPool.Run(() => UpdateOpcodes(v));
+        S.ThreadPool.Run(() => UpdateOpcodes(v, CurrentVersion));
     }
 
-    private void UpdateOpcodes(string gameVersion)
+    private void UpdateOpcodes(string gameVersion, string fileVersion)
     {
         using var client = new HttpClient();
         try
@@ -68,7 +68,7 @@ public unsafe class OpcodeUpdater : IDisposable
 
     void Save()
     {
-        C.GameVersion = CSFramework.Instance()->GameVersionString;
+        C.GameVersion = CurrentVersion;
         P.AllowedOperation = true;
         EzConfig.Save();
         PluginLog.Information($"New opcodes received. Plugin operational.");
