@@ -42,13 +42,13 @@ public unsafe class OpcodeUpdater : IDisposable
             if (Disposed) throw new Exception("Opcode updater was disposed");
             foreach (var s in result)
             {
-                if (s.StartsWith("ZoneUp="))
+                /*if (s.StartsWith("ZoneUp="))
                 {
                     var opcodes = s["ZoneUp=".Length..].Split(",").Select(uint.Parse);
                     PluginLog.Information($"Opcodes zone up: {opcodes}");
                     if (!opcodes.Any(x => x != 0)) throw new Exception("No opcodes were parsed");
                     Svc.Framework.RunOnFrameworkThread(() => C.OpcodesZoneUp = [.. opcodes]);
-                }
+                }*/
                 if (s.StartsWith("ZoneDown="))
                 {
                     var opcodes = s["ZoneDown=".Length..].Split(",").Select(uint.Parse);

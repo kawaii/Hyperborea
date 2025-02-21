@@ -51,7 +51,7 @@ public unsafe class Memory
     public Memory()
     {
         HeartbeatOpcode = (ushort)Marshal.ReadInt32(Svc.SigScanner.ScanText("C7 44 24 ?? ?? ?? ?? ?? 48 F7 F1") + 0x4);
-        
+        PluginLog.Information($"ZoneUp opcode: {HeartbeatOpcode}");
         EzSignatureHelper.Initialize(this);
         ActiveScene = (byte*)(((nint)EnvManager.Instance()) + 36);
     }

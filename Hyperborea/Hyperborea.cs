@@ -200,7 +200,7 @@ public unsafe class Hyperborea : IDalamudPlugin
             PluginLog.Warning($"Disconnect detected, opcode redownload scheduled.");
             C.GameVersion = "";
             C.OpcodesZoneDown = [];
-            C.OpcodesZoneUp = [];
+            //C.OpcodesZoneUp = [];
             AllowedOperation = false;
             EzConfig.Save();
         }
