@@ -46,8 +46,12 @@ public unsafe class Memory
 
     internal byte* ActiveScene;
 
+    private static ushort HeartbeatOpcode;
+    
     public Memory()
     {
+        HeartbeatOpcode = (ushort)Marshal.ReadInt32(Svc.SigScanner.ScanText("C7 44 24 ?? ?? ?? ?? ?? 48 F7 F1") + 0x4);
+        
         EzSignatureHelper.Initialize(this);
         ActiveScene = (byte*)(((nint)EnvManager.Instance()) + 36);
     }
@@ -158,7 +162,7 @@ public unsafe class Memory
         {
             var opcode = *(ushort*)a2;
 
-            if (C.OpcodesZoneUp.Contains(opcode))
+            if (opcode == HeartbeatOpcode)
             {
                 PluginLog.Verbose($"[HyperFirewall] Passing outgoing packet with opcode {opcode} through.");
                 return PacketDispatcher_OnSendPacketHook.Original(a1, a2, a3, a4);
