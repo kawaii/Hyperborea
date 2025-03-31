@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 
 namespace Hyperborea;
-public class YamlFactory : ISerializationFactory
+public class YamlFactory : DefaultSerializationFactory
 {
-    public string DefaultConfigFileName => "DefaultConfig.yaml";
+    public override string DefaultConfigFileName => "DefaultConfig.yaml";
 
-    public T Deserialize<T>(string inputData)
+    public override T Deserialize<T>(string inputData)
     {
         return new DeserializerBuilder()
             .IgnoreUnmatchedProperties()
             .Build().Deserialize<T>(inputData);
     }
 
-    public string Serialize(object s, bool prettyPrint)
+    public override string Serialize(object s, bool prettyPrint)
     {
         return new SerializerBuilder().Build().Serialize(s);
     }
