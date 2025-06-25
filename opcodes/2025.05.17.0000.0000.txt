@@ -1,0 +1,2 @@
+ZoneDown=320,232
+ZoneUp=293
