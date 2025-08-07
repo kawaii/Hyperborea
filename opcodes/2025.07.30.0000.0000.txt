@@ -1,0 +1,2 @@
+ZoneUp=967
+ZoneDown=134,630

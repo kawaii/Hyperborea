@@ -5,7 +5,7 @@ global using System.Linq;
 global using System.Text;
 global using System.Threading.Tasks;
 global using Dalamud.Plugin;
-global using ImGuiNET;
+global using Dalamud.Bindings.ImGui;
 global using ECommons.DalamudServices;
 global using Dalamud.Interface;
 global using Dalamud.Interface.Colors;

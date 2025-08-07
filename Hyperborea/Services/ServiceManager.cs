@@ -9,6 +9,6 @@ using System.Threading.Tasks;
 namespace Hyperborea.Services;
 public static class S
 {
-    [Priority(int.MaxValue)] public static ThreadPool ThreadPool { get; private set; }
+    public static ThreadPool ThreadPool { get; private set; }
     public static OpcodeUpdater OpcodeUpdater { get; private set; }
 }
