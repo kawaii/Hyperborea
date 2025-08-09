@@ -2,10 +2,14 @@
 using Dalamud.Memory;
 using ECommons.ExcelServices;
 using ECommons.EzHookManager;
+using FFXIVClientStructs.FFXIV.Application.Network;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
+using FFXIVClientStructs.FFXIV.Client.Network;
 using Lumina.Excel.Sheets;
+using System.CodeDom;
 using System.Net.NetworkInformation;
+using static FFXIVClientStructs.FFXIV.Client.Network.PacketDispatcher.Delegates;
 
 namespace Hyperborea;
 public unsafe class Memory
@@ -14,12 +18,8 @@ public unsafe class Memory
     [EzHook("40 55 41 54 41 55 41 56 41 57 48 83 EC 60 4C 8B F1", false)]
     internal EzHook<LoadZone> LoadZoneHook;
 
-    const string PacketDispatcher_OnReceivePacketHookSig = "48 89 5C 24 ?? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ?? ?? ?? ?? B8 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 2B E0 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 85 ?? ?? ?? ?? 45 0F B7 68"; //ffs
-    internal delegate void PacketDispatcher_OnReceivePacket(nint a1, uint a2, nint a3);
-    [EzHook(PacketDispatcher_OnReceivePacketHookSig, false)]
-    internal EzHook<PacketDispatcher_OnReceivePacket> PacketDispatcher_OnReceivePacketHook;
-    [EzHook(PacketDispatcher_OnReceivePacketHookSig, false)]
-    internal EzHook<PacketDispatcher_OnReceivePacket> PacketDispatcher_OnReceivePacketMonitorHook;
+    internal EzHook<PacketDispatcher.Delegates.OnReceivePacket> PacketDispatcher_OnReceivePacketHook;
+    internal EzHook<PacketDispatcher.Delegates.OnReceivePacket> PacketDispatcher_OnReceivePacketMonitorHook;
 
     internal delegate byte PacketDispatcher_OnSendPacket(nint a1, nint a2, nint a3, byte a4);
     [EzHook("48 89 5C 24 ?? 48 89 74 24 ?? 4C 89 64 24 ?? 55 41 56 41 57 48 8B EC 48 83 EC 70", false)]
@@ -50,6 +50,11 @@ public unsafe class Memory
     
     public Memory()
     {
+        var packetDispatcherAddr = (nint)CSFramework.Instance()->NetworkModuleProxy->NetworkModule->PacketReceiverCallback->PacketDispatcher.VirtualTable->OnReceivePacket;
+        PluginLog.Information($"OnReceivePacket: {packetDispatcherAddr}");
+        if(packetDispatcherAddr == 0) throw new ArgumentOutOfRangeException(nameof(packetDispatcherAddr));
+        PacketDispatcher_OnReceivePacketHook = new(packetDispatcherAddr, PacketDispatcher_OnReceivePacketDetour, false);
+        PacketDispatcher_OnReceivePacketMonitorHook = new(packetDispatcherAddr, PacketDispatcher_OnReceivePacketMonitorDetour, false);
         HeartbeatOpcode = (ushort)Marshal.ReadInt32(Svc.SigScanner.ScanText("C7 44 24 ?? ?? ?? ?? ?? 48 F7 F1") + 0x4);
         PluginLog.Information($"ZoneUp opcode: {HeartbeatOpcode}");
         EzSignatureHelper.Initialize(this);
@@ -101,7 +106,7 @@ public unsafe class Memory
         return SetupInstanceContentHook.Original(a1, a2, a3, a4);
     }
 
-    private void PacketDispatcher_OnReceivePacketMonitorDetour(nint a1, uint a2, nint a3)
+    private void PacketDispatcher_OnReceivePacketMonitorDetour(PacketDispatcher* a1, uint a2, nint a3)
     {
         PacketDispatcher_OnReceivePacketMonitorHook.Original(a1, a2, a3);
         try
@@ -182,7 +187,7 @@ public unsafe class Memory
         return DefaultReturnValue;
     }
 
-    private void PacketDispatcher_OnReceivePacketDetour(nint a1, uint a2, nint a3)
+    private void PacketDispatcher_OnReceivePacketDetour(PacketDispatcher* a1, uint a2, nint a3)
     {
         if (a3 == IntPtr.Zero)
         {
