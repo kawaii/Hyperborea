@@ -159,7 +159,7 @@ public unsafe class CompassWindow : Window
 
             ImGui.SetNextItemWidth(250f);
             var fests = P.SelectedFestivals.Select(x => P.FestivalDatas.FirstOrDefault(z => z.Id == x).Name).Join(", ");
-            if (ImGui.BeginCombo("##fest", fests.IsNullOrEmpty()? "Select festivals...":fests))
+            if (ImGui.BeginCombo("##fest", fests.IsNullOrEmpty()? "Select festivals...":fests, ImGuiComboFlags.HeightLarge))
             {
                 ImGui.SetNextItemWidth(150f);
                 ImGui.InputTextWithHint($"##fltr1", "Search", ref FestFilter, 50);
@@ -176,6 +176,7 @@ public unsafe class CompassWindow : Window
                     var disabled = !P.SelectedFestivals.Contains(x.Id) && P.SelectedFestivals.Count >= 4;
                     if (disabled) ImGui.BeginDisabled();
                     ImGuiEx.CollectionCheckbox($"{x.Name}##{x.Id}", x.Id, P.SelectedFestivals);
+                    if(P.SelectedFestivals.Contains(x.Id) && ImGui.IsWindowAppearing()) ImGui.SetScrollHereY();
                     if (disabled) ImGui.EndDisabled();
                 }
                 ImGui.EndCombo();

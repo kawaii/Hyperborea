@@ -9,6 +9,7 @@ using FFXIVClientStructs.FFXIV.Client.Network;
 using Lumina.Excel.Sheets;
 using System.CodeDom;
 using System.Net.NetworkInformation;
+using TerraFX.Interop.Windows;
 using static FFXIVClientStructs.FFXIV.Client.Network.PacketDispatcher.Delegates;
 
 namespace Hyperborea;
@@ -59,6 +60,15 @@ public unsafe class Memory
         PluginLog.Information($"ZoneUp opcode: {HeartbeatOpcode}");
         EzSignatureHelper.Initialize(this);
         ActiveScene = (byte*)(((nint)EnvManager.Instance()) + 36);
+        char* buffer = stackalloc char[512];
+        uint procId;
+        var title = new string(buffer);
+    }
+
+    [UnmanagedCallersOnly]
+    static BOOL EnumWindowsFunc(HWND handle, LPARAM lParam)
+    {
+        return BOOL.TRUE;
     }
 
     internal nint IsFlightProhibitedDetour()

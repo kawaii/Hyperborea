@@ -45,7 +45,7 @@ public unsafe class Hyperborea : IDalamudPlugin
     public ZoneData BuiltInZoneData;
     public Overlay Overlay;
     public bool Noclip = false;
-    public FestivalData[] FestivalDatas;
+    public List<FestivalData> FestivalDatas;
     public List<int> SelectedFestivals = [];
     public bool AllowedOperation = false;
 
@@ -81,7 +81,18 @@ public unsafe class Hyperborea : IDalamudPlugin
             Utils.LoadBuiltInZoneData();
             new EzFrameworkUpdate(Tick);
             Overlay = new();
-            FestivalDatas = EzConfig.DefaultSerializationFactory.Deserialize<FestivalData[]>(File.ReadAllText(Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName, "festivals.yaml")));
+            FestivalDatas = EzConfig.DefaultSerializationFactory.Deserialize<List<FestivalData>>(File.ReadAllText(Path.Combine(Svc.PluginInterface.AssemblyLocation.DirectoryName, "festivals.yaml")));
+            foreach(var x in Svc.Data.GetExcelSheet<Festival>())
+            {
+                if(x.RowId != 0 && !FestivalDatas.Any(d => d.Id == x.RowId))
+                {
+                    FestivalDatas.Add(new()
+                    {
+                        Id = (int)x.RowId,
+                        Name = $"Unknown {x.RowId}",
+                    });
+                }
+            }
             SingletonServiceManager.Initialize(typeof(S));
         });
     }
