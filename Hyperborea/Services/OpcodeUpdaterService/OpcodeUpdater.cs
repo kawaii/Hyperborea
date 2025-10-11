@@ -11,7 +11,7 @@ namespace Hyperborea.Services.OpcodeUpdaterService;
 public unsafe class OpcodeUpdater : IDisposable
 {
     volatile bool Disposed = false;
-    public string CurrentVersion => $"{CSFramework.Instance()->GameVersionString}_{P.GetType().Assembly.GetName().Version}";
+    public static string CurrentVersion => $"{CSFramework.Instance()->GameVersionString}_{P.GetType().Assembly.GetName().Version}";
 
     private OpcodeUpdater()
     {
@@ -69,7 +69,7 @@ public unsafe class OpcodeUpdater : IDisposable
         }
     }
 
-    void Save()
+    public static void Save()
     {
         C.GameVersion = CurrentVersion;
         P.AllowedOperation = true;

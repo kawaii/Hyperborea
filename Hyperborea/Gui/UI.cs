@@ -36,7 +36,7 @@ public unsafe static class UI
         }*/
         if(!P.AllowedOperation)
         {
-            ImGuiEx.Text(EColor.RedBright, $"For this version, no opcodes are found. Please wait until they are available again.");
+            ImGuiEx.TextWrapped(EColor.RedBright, $"For this version, no opcodes are found. Please wait until they are available again.");
             if(ImGuiEx.Button("Try updating opcodes", EzThrottler.Check("Opcode")))
             {
                 EzThrottler.Throttle("Opcode", 60000, true);
@@ -48,6 +48,11 @@ public unsafe static class UI
                     }
                 });
             }
+            if(ImGuiEx.Button("Enter opcodes manually", ImGuiEx.Ctrl))
+            {
+                P.DebugWindow.IsOpen = true;
+            }
+            ImGuiEx.Tooltip("If you mess up, this can put your account at serious risk");
             return;
         }
         var l = LayoutWorld.Instance()->ActiveLayout;

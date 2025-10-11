@@ -1,13 +1,17 @@
 ﻿using Dalamud.Memory;
+using ECommons.Configuration;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.Hooks;
+using ECommons.Opcodes;
 using ECommons.SimpleGui;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
+using Hyperborea.Services.OpcodeUpdaterService;
 using Lumina.Excel.Sheets;
 using System.Windows.Forms;
+using OpcodeUpdater = Hyperborea.Services.OpcodeUpdaterService.OpcodeUpdater;
 
 namespace Hyperborea.Gui;
 public unsafe class DebugWindow: Window
@@ -30,29 +34,29 @@ public unsafe class DebugWindow: Window
 
     void DrawOpcodes()
     {
-        ImGui.Checkbox("Manual opcode management", ref C.ManualOpcodeManagement);
-        ImGui.Indent();
-        ImGuiEx.HelpMarker($"When enabled, Hyperborea will not make any attempts to update opcodes and you will have to edit them manually every game update.");
-        ImGui.Checkbox("Disable ZoneUp Auto Detect", ref C.DisableZoneUpAutoDetect);
-        ImGuiEx.HelpMarker("Also manually define ZoneUp packets");
+        ImGui.Checkbox("Disable opcode auto-update", ref C.ManualOpcodeManagement);
+        ImGuiEx.HelpMarker($"When enabled, Hyperborea will not make any attempts to update opcodes and you will have to edit them manually every game update. You do not have to enable this checkbox in order to edit opcodes one time. ");
 
         ImGuiEx.TextWrapped($"""
                 Enter ZoneDown opcodes.
                 How to find: go to the Inn, type /xldata network, wait for a while without doing any actions. You should see two opcodes with Direction=ZoneDown that repeats with the same time interval. Input value from OpCode column.
                 """);
         EditOpcodes("##zoneDown", ref C.OpcodesZoneDown);
+        ImGui.Separator();
+        ImGui.Checkbox("Disable ZoneUp Auto Detect", ref C.DisableZoneUpAutoDetect);
         if(C.DisableZoneUpAutoDetect)
         {
+            ImGui.Indent();
             ImGuiEx.TextWrapped($"""
                 Enter ZoneDown opcode.
                 How to find: go to the Inn, type /xldata network, wait for a while without doing any actions. You should see one opcode with Direction=ZoneUp that repeats with the same time interval. Input value from OpCode column.
                 """);
             EditOpcodes("##zoneUp", ref C.OpcodesZoneUp);
+            ImGui.Unindent();
         }
         if(ImGuiEx.IconButtonWithText(FontAwesomeIcon.Check, "Apply"))
         {
-            C.GameVersion = CSFramework.Instance()->GameVersionString;
-            P.AllowedOperation = true;
+            OpcodeUpdater.Save();
         }
 
         ImGui.Unindent();
