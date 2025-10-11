@@ -22,7 +22,57 @@ public unsafe class DebugWindow: Window
 
     public override void Draw()
     {
-        ImGuiEx.EzTabBar("Tabs", [("Debug", DrawDebug, null, true)]);
+        ImGuiEx.EzTabBar("Tabs", [
+            ("Opcodes", DrawOpcodes, null, true),
+            ("Debug", DrawDebug, null, true)
+            ]);
+    }
+
+    void DrawOpcodes()
+    {
+        ImGui.Checkbox("Manual opcode management", ref C.ManualOpcodeManagement);
+        ImGui.Indent();
+        ImGuiEx.HelpMarker($"When enabled, Hyperborea will not make any attempts to update opcodes and you will have to edit them manually every game update.");
+        ImGui.Checkbox("Disable ZoneUp Auto Detect", ref C.DisableZoneUpAutoDetect);
+        ImGuiEx.HelpMarker("Also manually define ZoneUp packets");
+
+        ImGuiEx.TextWrapped($"""
+                Enter ZoneDown opcodes.
+                How to find: go to the Inn, type /xldata network, wait for a while without doing any actions. You should see two opcodes with Direction=ZoneDown that repeats with the same time interval. Input value from OpCode column.
+                """);
+        EditOpcodes("##zoneDown", ref C.OpcodesZoneDown);
+        if(C.DisableZoneUpAutoDetect)
+        {
+            ImGuiEx.TextWrapped($"""
+                Enter ZoneDown opcode.
+                How to find: go to the Inn, type /xldata network, wait for a while without doing any actions. You should see one opcode with Direction=ZoneUp that repeats with the same time interval. Input value from OpCode column.
+                """);
+            EditOpcodes("##zoneUp", ref C.OpcodesZoneUp);
+        }
+        if(ImGuiEx.IconButtonWithText(FontAwesomeIcon.Check, "Apply"))
+        {
+            C.GameVersion = CSFramework.Instance()->GameVersionString;
+            P.AllowedOperation = true;
+        }
+
+        ImGui.Unindent();
+    }
+
+    void EditOpcodes(string id, ref uint[] opcodes)
+    {
+        var str = opcodes.Print(",");
+        List<uint> newOpcodes = [];
+        if(ImGui.InputText(id, ref str))
+        {
+            foreach(var x in str.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                if(uint.TryParse(x, out var result))
+                {
+                    newOpcodes.Add(result);
+                }
+            }
+            opcodes = newOpcodes.ToArray();
+        }
     }
 
     void DrawZoneEditor()

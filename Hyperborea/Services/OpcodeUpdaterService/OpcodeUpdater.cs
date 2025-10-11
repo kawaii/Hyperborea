@@ -23,14 +23,17 @@ public unsafe class OpcodeUpdater : IDisposable
         else
         {
             PluginLog.Information("New game version detected, opcode update required");
-            S.ThreadPool.Run(RunForCurrentVersion);
+            RunForCurrentVersion();
         }
     }
 
     public void RunForCurrentVersion()
     {
         var v = CSFramework.Instance()->GameVersionString;
-        S.ThreadPool.Run(() => UpdateOpcodes(v, CurrentVersion));
+        if(!C.ManualOpcodeManagement)
+        {
+            S.ThreadPool.Run(() => UpdateOpcodes(v, CurrentVersion));
+        }
     }
 
     private void UpdateOpcodes(string gameVersion, string fileVersion)

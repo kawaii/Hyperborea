@@ -29,6 +29,11 @@ public unsafe static class UI
 
     public static void DrawNeo()
     {
+        /*if(!Svc.Condition[ConditionFlag.OnFreeTrial])
+        {
+            ImGuiEx.TextWrapped(EColor.RedBright, "You can currently use Hyperborea only with free trial accounts. Please register free trial account and try again or wait for an update.");
+            return;
+        }*/
         if(!P.AllowedOperation)
         {
             ImGuiEx.Text(EColor.RedBright, $"For this version, no opcodes are found. Please wait until they are available again.");

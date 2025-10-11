@@ -10,5 +10,7 @@ public class Config : IEzConfig
     public bool ForcedFlight = false;
     public string GameVersion = "";
     public uint[] OpcodesZoneDown = [];
-    //public uint[] OpcodesZoneUp = [];
+    public uint[] OpcodesZoneUp = [];
+    public bool ManualOpcodeManagement = false;
+    public bool DisableZoneUpAutoDetect = false;
 }

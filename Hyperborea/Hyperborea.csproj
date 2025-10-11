@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <Authors>kawaii</Authors>
-        <Version>1.0.0.26</Version>
+        <Version>1.0.0.28</Version>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -77,10 +77,6 @@
         </Reference>
         <Reference Include="SharpDX">
             <HintPath>$(DalamudLibPath)SharpDX.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="PInvoke.User32">
-            <HintPath>$(DalamudLibPath)PInvoke.User32.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>

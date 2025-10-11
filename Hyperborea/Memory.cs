@@ -48,6 +48,10 @@ public unsafe class Memory
     internal byte* ActiveScene;
 
     private static ushort HeartbeatOpcode;
+
+    internal delegate byte IsAllowedToReceiveDirectMessages(nint a1, int checkType, byte a3, byte a4);
+    [EzHook("48 89 5C 24 ?? 57 48 83 EC 20 48 63 FA 41 0F B6 D8", false)]
+    internal EzHook<IsAllowedToReceiveDirectMessages> IsAllowedToReceiveDirectMessagesHook;
     
     public Memory()
     {
@@ -60,15 +64,6 @@ public unsafe class Memory
         PluginLog.Information($"ZoneUp opcode: {HeartbeatOpcode}");
         EzSignatureHelper.Initialize(this);
         ActiveScene = (byte*)(((nint)EnvManager.Instance()) + 36);
-        char* buffer = stackalloc char[512];
-        uint procId;
-        var title = new string(buffer);
-    }
-
-    [UnmanagedCallersOnly]
-    static BOOL EnumWindowsFunc(HWND handle, LPARAM lParam)
-    {
-        return BOOL.TRUE;
     }
 
     internal nint IsFlightProhibitedDetour()
@@ -142,6 +137,15 @@ public unsafe class Memory
         //return ret;
     }
 
+    private byte IsAllowedToReceiveDirectMessagesDetour(nint a1, int checkType, byte a3, byte a4)
+    {
+        if(checkType == 2)
+        {
+            return 1;
+        }
+        return IsAllowedToReceiveDirectMessagesHook.Original(a1, checkType, a3, a4);
+    }
+
     private nint TargetSystem_InteractWithObjectDetour(nint a1, nint a2, byte a3)
     {
         return 0;
@@ -149,6 +153,7 @@ public unsafe class Memory
 
     public void EnableFirewall()
     {
+        IsAllowedToReceiveDirectMessagesHook.Enable();
         PacketDispatcher_OnReceivePacketHook.Enable();
         PacketDispatcher_OnSendPacketHook.Enable();
         IsFlightProhibitedHook?.Enable();
@@ -156,6 +161,7 @@ public unsafe class Memory
 
     public void DisableFirewall()
     {
+        IsAllowedToReceiveDirectMessagesHook.Pause();
         PacketDispatcher_OnReceivePacketHook.Pause();
         PacketDispatcher_OnSendPacketHook.Pause();
         IsFlightProhibitedHook?.Pause();
@@ -177,7 +183,12 @@ public unsafe class Memory
         {
             var opcode = *(ushort*)a2;
 
-            if (opcode == HeartbeatOpcode)
+            if(C.ManualOpcodeManagement && C.DisableZoneUpAutoDetect && C.OpcodesZoneUp.Contains(opcode))
+            {
+                PluginLog.Verbose($"[HyperFirewall] (manual management) Passing outgoing packet with opcode {opcode} through.");
+                return PacketDispatcher_OnSendPacketHook.Original(a1, a2, a3, a4);
+            }
+            else if (opcode == HeartbeatOpcode)
             {
                 PluginLog.Verbose($"[HyperFirewall] Passing outgoing packet with opcode {opcode} through.");
                 return PacketDispatcher_OnSendPacketHook.Original(a1, a2, a3, a4);
