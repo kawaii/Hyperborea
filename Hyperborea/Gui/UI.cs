@@ -52,7 +52,7 @@ public unsafe static class UI
             {
                 P.DebugWindow.IsOpen = true;
             }
-            ImGuiEx.Tooltip("If you mess up, this can put your account at serious risk");
+            ImGuiEx.Tooltip("Hold CTRL and click. If you mess up, this can put your account at serious risk");
             return;
         }
         var l = LayoutWorld.Instance()->ActiveLayout;
