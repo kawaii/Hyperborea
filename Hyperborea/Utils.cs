@@ -4,6 +4,7 @@ using ECommons.ExcelServices.TerritoryEnumeration;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Hooks;
+using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
@@ -264,6 +265,15 @@ public unsafe static class Utils
 
         P.Memory.LoadZoneDetour((nint)GameMain.Instance(), territory, a3, (byte)a4, (byte)a5, (byte)a6);
         P.Memory.SetupTerritoryType(EventFramework.Instance(), (ushort)territory);
+        try
+        {
+            var cs = DalamudReflector.GetService("Dalamud.Game.ClientState.ClientState");
+            cs.SetFoP("TerritoryType", (ushort)territory);
+        }
+        catch(Exception e)
+        {
+            e.Log();
+        }
         P.TaskManager.Enqueue(P.ApplyFestivals);
         var level = Svc.Data.GetExcelSheet<TerritoryType>().GetRowOrDefault(territory)?.Bg.ExtractText();
         if(!level.IsNullOrEmpty() && Utils.TryGetZoneInfo(level, out var value))

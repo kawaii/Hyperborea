@@ -4,6 +4,7 @@ using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.Hooks;
 using ECommons.Opcodes;
+using ECommons.Reflection;
 using ECommons.SimpleGui;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
@@ -94,7 +95,15 @@ public unsafe class DebugWindow: Window
     long[] longs = new long[100];
     void DrawDebug()
     {
-
+        try
+        {
+            var cs = DalamudReflector.GetService("Dalamud.Game.ClientState.ClientState");
+            ImGuiEx.Text($"{cs.GetFoP("TerritoryType")}");
+        }
+        catch(Exception e)
+        {
+            e.Log();
+        }
         {
             var l = LayoutWorld.Instance()->ActiveLayout;
             if(l != null)
