@@ -8,6 +8,44 @@
 - Id: 7
   Name: Breaking Brick Mountains
   Unsafe: false
+- Id: 17
+  # Sanctum of the Twelve
+  Name: Carpet
+  Unsafe: false
+  Phases:
+  - Id: 1
+    Name: White
+  - Id: 2
+    Name: Pink
+  - Id: 3
+    Name: Orange
+  - Id: 4
+    Name: Blue
+  - Id: 5
+    Name: Red
+- Id: 18
+  # Sanctum of the Twelve
+  Name: Floral
+  Unsafe: false
+  Phases:
+  - Id: 1
+    Name: White (Standard)
+  - Id: 2
+    Name: White (Gold)
+  - Id: 3
+    Name: Pink (Gold)
+  - Id: 4
+    Name: Orange (Gold)
+  - Id: 5
+    Name: White (Platinum)
+  - Id: 6
+    Name: Pink (Platinum)
+  - Id: 7
+    Name: Orange (Platinum)
+  - Id: 8
+    Name: Blue (Platinum)
+  - Id: 9
+    Name: Red (Platinum)
 - Id: 26
   Name: New Year Machinations (Music) (2015)
   Unsafe: false
@@ -98,6 +136,32 @@
 - Id: 73
   Name: Fifth Anniversary Content (2018)
   Unsafe: false
+- Id: 74
+  # Sanctum of the Twelve
+  Name: Lighting
+  Unsafe: false
+  Phases:
+  - Id: 1
+    Name: Natural
+  - Id: 2
+    Name: Romantic
+- Id: 75
+  # Sanctum of the Twelve
+  Name: Drapes
+  Unsafe: false
+  Phases:
+  - Id: 1
+    Name: Plain
+  - Id: 2
+    Name: White
+  - Id: 3
+    Name: Pink
+  - Id: 4
+    Name: Orange
+  - Id: 5
+    Name: Blue
+  - Id: 6
+    Name: Red
 - Id: 76
   Name: All Saint's Wake (2018)
   Unsafe: false
