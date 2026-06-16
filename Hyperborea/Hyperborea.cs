@@ -46,7 +46,6 @@ public unsafe class Hyperborea : IDalamudPlugin
     public Overlay Overlay;
     public bool Noclip = false;
     public List<FestivalData> FestivalDatas;
-    public List<int> SelectedFestivals = [];
     public bool AllowedOperation = false;
 
     public Hyperborea(IDalamudPluginInterface pi)
@@ -244,17 +243,22 @@ public unsafe class Hyperborea : IDalamudPlugin
         }
     }
 
-    public void ApplyFestivals()
+    public void ApplyFestivals(IReadOnlyList<FestivalInfo> festivals)
     {
-        var festivalArray = stackalloc uint[] { 0, 0, 0, 0 };
-        for (int i = 0; i < Math.Min(4, SelectedFestivals.Count); i++)
-        {
-            festivalArray[i] = (uint)SelectedFestivals[i];
-        }
         var l = LayoutWorld.Instance()->ActiveLayout;
-        if(l != null)
+        if (l != null)
         {
-            l->SetActiveFestivals((GameMain.Festival*)festivalArray);
+            var festivalArray = stackalloc GameMain.Festival[8];
+            var count = Math.Min(8, festivals?.Count ?? 0);
+            for (int i = 0; i < count; i++)
+            {
+                festivalArray[i] = new GameMain.Festival
+                {
+                    Id = (ushort)festivals[i].Id,
+                    Phase = (ushort)festivals[i].PhaseId,
+                };
+            }
+            l->SetActiveFestivals(festivalArray);
         }
     }
 

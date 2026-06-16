@@ -11,6 +11,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using Hyperborea.Gui;
+using Lumina.Data.Files;
 using Lumina.Excel.Sheets;
 using System.Globalization;
 using System.IO;
@@ -167,6 +168,7 @@ public unsafe static class Utils
                 MapEffect.Delegate(Utils.GetMapEffectModule(), (uint)x.a1, (ushort)x.a2, (ushort)x.a3);
             }
         }
+        P.ApplyFestivals(phase.Festivals);
     }
 
     public static PhaseInfo GetPhase(uint territoryType)
@@ -234,6 +236,41 @@ public unsafe static class Utils
         return TryFindBytes(haystack, needle.Split(" ").Select(x => byte.Parse(x, NumberStyles.HexNumber)).ToArray(), out pos);
     }
 
+    static readonly Dictionary<string, List<(int Id, List<int> Phases)>> ZoneFestivalCache = [];
+    static readonly string[] FestivalLgbNames = ["bg", "planevent"];
+
+    public static List<(int Id, List<int> PhaseIds)> GetZoneFestivals(string bg)
+    {
+        if (bg.IsNullOrEmpty()) return [];
+        if (!ZoneFestivalCache.TryGetValue(bg, out var cached))
+        {
+            var festIdToPhaseId = new SortedDictionary<int, SortedSet<int>>();
+            try
+            {
+                var slash = bg.LastIndexOf('/');
+                var dir = slash >= 0 ? bg[..slash] : bg;
+                foreach (var name in FestivalLgbNames)
+                {
+                    var lgb = Svc.Data.GetFile<LgbFile>($"bg/{dir}/{name}.lgb");
+                    if (lgb == null) continue;
+                    foreach (var layer in lgb.Layers)
+                    {
+                        if (layer.FestivalID == 0) continue;
+                        if (!festIdToPhaseId.TryGetValue(layer.FestivalID, out var phaseIds))
+                            festIdToPhaseId[layer.FestivalID] = phaseIds = [];
+                        phaseIds.Add(layer.FestivalPhaseID);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                PluginLog.Error($"Failed to load festivals for {bg}\n{e}");
+            }
+            ZoneFestivalCache[bg] = cached = festIdToPhaseId.Select(kv => (kv.Key, kv.Value.ToList())).ToList();
+        }
+        return cached;
+    }
+
     public static bool IsInInn()
     {
         if (Svc.ClientState.LocalPlayer == null) return false;
@@ -274,7 +311,6 @@ public unsafe static class Utils
         {
             e.Log();
         }
-        P.TaskManager.Enqueue(P.ApplyFestivals);
         var level = Svc.Data.GetExcelSheet<TerritoryType>().GetRowOrDefault(territory)?.Bg.ExtractText();
         if(!level.IsNullOrEmpty() && Utils.TryGetZoneInfo(level, out var value))
         {
@@ -290,6 +326,7 @@ public unsafe static class Utils
                     var e = EnvManager.Instance();
                     e->ActiveWeather = (byte)value.Phases.First().Weather;
                     e->TransitionTime = 0.5f;
+                    P.ApplyFestivals(value.Phases.First().Festivals);
                 });
             }
         }

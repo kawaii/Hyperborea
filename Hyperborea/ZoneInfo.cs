@@ -15,6 +15,7 @@ public class PhaseInfo
     public string Name = "";
     public uint Weather = 0;
     public List<MapEffectInfo> MapEffects = [];
+    public List<FestivalInfo> Festivals = [];
 }
 
 [Serializable]
@@ -24,6 +25,14 @@ public class MapEffectInfo
     public int a1;
     public int a2;
     public int a3;
+}
+
+[Serializable]
+public class FestivalInfo
+{
+    [NonSerialized] internal string GUID = Guid.NewGuid().ToString();
+    public int Id;
+    public int PhaseId = -1;
 }
 
 [Serializable]

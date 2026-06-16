@@ -1,4 +1,5 @@
 ﻿using Dalamud.Interface.Components;
+using Dalamud.Interface.Utility.Raii;
 using ECommons.Configuration;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
@@ -185,6 +186,17 @@ public unsafe class EditorWindow : Window
                             }
                             ImGui.PopID();
                         }
+                        ImGuiEx.TextV($"Festivals:");
+                        var zoneFests = Utils.GetZoneFestivals(bg);
+                        if (zoneFests.Count == 0)
+                        {
+                            ImGui.SameLine();
+                            ImGui.TextDisabled("(none in this zone)");
+                        }
+                        foreach (var (festivalId, festivalPhases) in zoneFests)
+                        {
+                            DrawFestivalRow(p, festivalId, festivalPhases);
+                        }
                     }
                     ImGui.PopID();
                 }
@@ -218,5 +230,54 @@ public unsafe class EditorWindow : Window
                 }
             }
         }
+    }
+
+    void DrawFestivalRow(PhaseInfo p, int festivalId, List<int> festivalPhaseIds)
+    {
+        using var id = ImRaii.PushId(festivalId);
+
+        var data = P.FestivalDatas.FirstOrDefault(z => z.Id == festivalId);
+        var selected = p.Festivals.FirstOrDefault(z => z.Id == festivalId);
+        var IsMulti = festivalPhaseIds.Any(x => x != 0);
+
+        ImGui.SetNextItemWidth(160f);
+        if (ImGui.BeginCombo($"##Festival", PhaseLabel(data, selected.PhaseId, IsMulti)))
+        {
+            foreach (var phaseId in (int[])[-1, .. festivalPhaseIds])
+            {
+                if (ImGui.Selectable(PhaseLabel(data, phaseId, IsMulti), selected.PhaseId == phaseId))
+                {
+                    if (phaseId < 0)
+                    {
+                        p.Festivals.RemoveAll(z => z.Id == festivalId);
+                    }
+                    else if (selected == null)
+                    {
+                        selected = new() { Id = festivalId, PhaseId = phaseId };
+                        p.Festivals.Add(selected);
+                    }
+                    else
+                    {
+                        selected.PhaseId = phaseId;
+                    }
+                    if (P.Enabled && Svc.ClientState.TerritoryType == TerrID && Utils.GetPhase(Svc.ClientState.TerritoryType) == p)
+                    {
+                        P.ApplyFestivals(p.Festivals);
+                    }
+                }
+            }
+            ImGui.EndCombo();
+        }
+        ImGui.SameLine();
+        ImGuiEx.Text(data?.Name.NullWhenEmpty() ?? $"#{festivalId}");
+    }
+
+    static string PhaseLabel(FestivalData data, int phaseId, bool isMulti)
+    {
+        if (phaseId < 0) return "Off";
+        if (!isMulti) return "On";
+        var pname = data?.Phases.FirstOrDefault(z => z.Id == phaseId)?.Name;
+        if (!pname.IsNullOrEmpty()) return $"{phaseId} - {pname}";
+        return $"Phase {phaseId}";
     }
 }
