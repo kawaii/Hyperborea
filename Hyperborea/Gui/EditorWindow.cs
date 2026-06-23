@@ -241,11 +241,11 @@ public unsafe class EditorWindow : Window
         var IsMulti = festivalPhaseIds.Any(x => x != 0);
 
         ImGui.SetNextItemWidth(160f);
-        if (ImGui.BeginCombo($"##Festival", PhaseLabel(data, selected.PhaseId, IsMulti)))
+        if (ImGui.BeginCombo($"##Festival", PhaseLabel(data, selected?.PhaseId, IsMulti)))
         {
             foreach (var phaseId in (int[])[-1, .. festivalPhaseIds])
             {
-                if (ImGui.Selectable(PhaseLabel(data, phaseId, IsMulti), selected.PhaseId == phaseId))
+                if (ImGui.Selectable(PhaseLabel(data, phaseId, IsMulti), selected?.PhaseId == phaseId))
                 {
                     if (phaseId < 0)
                     {
@@ -272,9 +272,9 @@ public unsafe class EditorWindow : Window
         ImGuiEx.Text(data?.Name.NullWhenEmpty() ?? $"#{festivalId}");
     }
 
-    static string PhaseLabel(FestivalData data, int phaseId, bool isMulti)
+    static string PhaseLabel(FestivalData data, int? phaseId, bool isMulti)
     {
-        if (phaseId < 0) return "Off";
+        if (phaseId < 0 || phaseId == null) return "Off";
         if (!isMulti) return "On";
         var pname = data?.Phases.FirstOrDefault(z => z.Id == phaseId)?.Name;
         if (!pname.IsNullOrEmpty()) return $"{phaseId} - {pname}";
