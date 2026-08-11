@@ -165,7 +165,8 @@ public unsafe static class Utils
         {
             foreach(var x in phase.MapEffects)
             {
-                MapEffect.Delegate(Utils.GetMapEffectModule(), (uint)x.a1, (ushort)x.a2, (ushort)x.a3);
+                var timelineIndex = x.TimelineOverride != 0 ? x.TimelineOverride : x.State;
+                MapEffect.Delegate(GetMapEffectModule(), (uint)x.Slot, (ushort)x.State, (ushort)timelineIndex);
             }
         }
         P.ApplyFestivals(phase.Festivals);
@@ -209,6 +210,13 @@ public unsafe static class Utils
         return false;
     }
 
+    // TODO: This should be changed to the Lumina LvbFile once it got merged!
+    // var file = Svc.Data.GetFile<Lumina.Data.Files.LvbFile>($"bg/{territoryType.Value.Bg}.lvb");
+    // if (file?.WeatherIds == null || file.WeatherIds.Length == 0) return (null, null);
+    // foreach (var weather in file.WeatherIds) if (weather > 0 && weather < 255) weathers.Add((byte)weather);
+    // weathers.Sort();
+    // return (weathers, file.EnvbFile);
+    // (and delete Hyperborea's own LvbFile.cs entirely)
     public static (List<byte> WeatherList, string EnvbFile) ParseLvb(ushort id)
     {
         var weathers = new List<byte>();

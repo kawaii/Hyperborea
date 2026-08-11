@@ -22,9 +22,9 @@ public class PhaseInfo
 public class MapEffectInfo
 {
     [NonSerialized] internal string GUID = Guid.NewGuid().ToString();
-    public int a1;
-    public int a2;
-    public int a3;
+    public int Slot; 
+    public int State; 
+    public int TimelineOverride;
 }
 
 [Serializable]

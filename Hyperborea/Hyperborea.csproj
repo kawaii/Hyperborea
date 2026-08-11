@@ -72,6 +72,10 @@
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>False</Private>
         </Reference>
+		<Reference Include="InteropGenerator.Runtime">
+            <HintPath>$(DalamudLibPath)InteropGenerator.Runtime.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
         <Reference Include="ImGuiScene">
             <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
             <Private>False</Private>
