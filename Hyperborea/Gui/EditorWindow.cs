@@ -1,4 +1,4 @@
-﻿using Dalamud.Interface.Components;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.Configuration;
 using ECommons.ExcelServices;
@@ -168,23 +168,96 @@ public unsafe class EditorWindow : Window
                             Safe(() => p.MapEffects = P.YamlFactory.Deserialize<List<MapEffectInfo>>(Paste()));
                         }
                         ImGuiEx.Tooltip("Paste and override MapEffects into this phase.");
+                        var slots = MapEffectResolver.GetZoneSlots(TerrID);
                         foreach (var x in p.MapEffects)
                         {
                             ImGui.PushID(x.GUID);
-                            ImGui.SetNextItemWidth(100f);
-                            ImGui.InputInt($"##a1", ref x.a1);
+
+                            var isDupe = p.MapEffects.Count(y => y.Slot == x.Slot) > 1;
+                            if (isDupe)
+                            {
+                                ImGuiEx.Text(EColor.RedBright, "[DUPLICATE SLOT]");
+                                ImGuiEx.Tooltip("Another entry in this phase already targets this slot. Only the last one in the list will actually apply.");
+                                ImGui.SameLine();
+                            }
+
+                            var curSlot = slots.FirstOrDefault(s => s.Slot == x.Slot);
+                            ImGui.SetNextItemWidth(180f);
+                            if (ImGui.BeginCombo("##slot", curSlot != null ? $"{x.Slot}: {curSlot.SgbName}" : $"Slot {x.Slot} (unknown)"))
+                            {
+                                foreach (var s in slots)
+                                {
+                                    if (s.Slot != x.Slot && p.MapEffects.Any(y => y.GUID != x.GUID && y.Slot == s.Slot)) continue;
+
+                                    if (ImGui.Selectable($"{s.Slot}: {s.SgbName}##slot{s.Slot}", x.Slot == s.Slot))
+                                    {
+                                        x.Slot = s.Slot;
+                                        x.State = 0;
+                                        x.TimelineOverride = 0;
+                                    }
+                                }
+                                ImGui.EndCombo();
+                            }
+                            ImGuiEx.Tooltip("Which MapEffect slot to control.");
                             ImGui.SameLine();
-                            ImGui.SetNextItemWidth(100f);
-                            ImGui.InputInt($"##a2", ref x.a2);
+
+                            var states = curSlot?.States ?? [];
+                            var curStateName = states.FirstOrDefault(st => st.State == (ushort)x.State).Name;
+                            ImGui.SetNextItemWidth(180f);
+                            if (ImGui.BeginCombo("##state", curStateName.NullWhenEmpty() != null ? $"{x.State}: {curStateName}" : $"State {x.State}"))
+                            {
+                                if (ImGui.Selectable("0 (no-op)", x.State == 0)) x.State = 0;
+                                foreach (var (state, name) in states)
+                                {
+                                    if (ImGui.Selectable($"{state}: {name}##st{state}", x.State == state)) x.State = state;
+                                }
+                                ImGui.EndCombo();
+                            }
+                            ImGuiEx.Tooltip("Which state to set the slot to. By default this also drives which timeline actively plays.");
                             ImGui.SameLine();
-                            ImGui.SetNextItemWidth(100f);
-                            ImGui.InputInt($"##a3", ref x.a3);
+
+                            if (ImGuiEx.IconButton(FontAwesomeIcon.Cog))
+                            {
+                                ImGui.SetNextWindowPos(new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y));
+                                ImGui.OpenPopup("##advTimeline");
+                            }
+                            ImGuiEx.Tooltip("Advanced: override which timelines actively play, independent of State.\nLeave at default (0) unless you need to combine multiple independent effects on this slot (e.g. torches + gate) or trigger a transition bit that isn't a resting State value.");
+                            ImGui.SetNextWindowSize(new Vector2(280f, 0f), ImGuiCond.Appearing);
+                            if (ImGui.BeginPopup("##advTimeline"))
+                            {
+                                ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + 260f);
+                                ImGuiEx.TextWrapped("Which timelines actively play/stop right now. Leave everything unchecked to just follow State above (default, safest).");
+                                ImGui.PopTextWrapPos();
+                                if (ImGui.Selectable("Reset to default (follow State)")) x.TimelineOverride = 0;
+                                ImGui.Separator();
+                                foreach (var (state, name) in states)
+                                {
+                                    var on = ((ushort)x.TimelineOverride & state) != 0;
+                                    if (ImGui.Checkbox($"{state}: {name}##tl{state}", ref on))
+                                    {
+                                        x.TimelineOverride = on ? (x.TimelineOverride | state) : (x.TimelineOverride & ~state);
+                                    }
+                                }
+                                ImGui.EndPopup();
+                            }
+                            if (x.TimelineOverride != 0)
+                            {
+                                ImGui.SameLine();
+                                var curTimelineNames = states.Where(st => ((ushort)x.TimelineOverride & st.State) != 0).Select(st => st.Name).ToList();
+                                ImGuiEx.Text(EColor.YellowBright, curTimelineNames.Count > 0 ? string.Join(", ", curTimelineNames) : $"{x.TimelineOverride}");
+                                ImGuiEx.Tooltip("Timeline override active (not following State).");
+                            }
                             ImGui.SameLine();
+
                             if (ImGui.Button("Delete"))
                             {
                                 new TickScheduler(() => p.MapEffects.RemoveAll(z => z.GUID == x.GUID));
                             }
                             ImGui.PopID();
+                        }
+                        if (slots.Count == 0)
+                        {
+                            ImGui.TextDisabled(" No MapEffect slots found for this zone.");
                         }
                         ImGuiEx.TextV($"Festivals:");
                         var zoneFests = Utils.GetZoneFestivals(bg);

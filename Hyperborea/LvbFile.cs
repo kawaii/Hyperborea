@@ -2,6 +2,7 @@
 
 namespace Hyperborea;
 
+// TODO: This should be removed once Lumina LvbFile got merged! See Utils.cs comment on ParseLvb
 unsafe public class LvbFile : FileResource
 {
     public ushort[] weatherIds;
