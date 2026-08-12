@@ -37,7 +37,7 @@ public unsafe class Hyperborea : IDalamudPlugin
     public ZoneData ZoneData;
     public TaskManager TaskManager;
     public Random Random = new();
-    public const string DataFileName = "DefaultZoneData.yaml";
+    public const string DataFileName = "overrides.yaml";
     public bool Bypass = false;
     public YamlFactory YamlFactory = new();
     public EditorWindow EditorWindow;
@@ -73,6 +73,7 @@ public unsafe class Hyperborea : IDalamudPlugin
             new EzLogout(OnLogout);
             new EzTerritoryChanged(OnTerritoryChanged);
             TaskManager = new();
+            Utils.RenameConfigFile("DefaultZoneData.yaml", DataFileName);
             ZoneData = EzConfig.LoadConfiguration<ZoneData>(DataFileName);
             MapEffect.Init(OnMapEffect);
             EditorWindow = new();

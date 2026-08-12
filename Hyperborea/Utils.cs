@@ -172,6 +172,23 @@ public unsafe static class Utils
         P.ApplyFestivals(phase.Festivals);
     }
 
+    public static void RenameConfigFile(string old, string @new)
+    {
+        var oldFile = Path.Combine(Svc.PluginInterface.GetPluginConfigDirectory(), old);
+        var newFile = Path.Combine(Svc.PluginInterface.GetPluginConfigDirectory(), @new);
+        if(File.Exists(oldFile) && !File.Exists(newFile))
+        {
+            try
+            {
+                File.Move(oldFile, newFile);
+            }
+            catch(Exception e)
+            {
+                e.Log();
+            }
+        }
+    }
+
     public static PhaseInfo GetPhase(uint territoryType)
     {
         if (TryGetZoneInfo(ExcelTerritoryHelper.GetBG(territoryType), out var zone))
