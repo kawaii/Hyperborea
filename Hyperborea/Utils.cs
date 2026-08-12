@@ -166,7 +166,7 @@ public unsafe static class Utils
             foreach(var x in phase.MapEffects)
             {
                 var timelineIndex = x.TimelineOverride != 0 ? x.TimelineOverride : x.State;
-                MapEffect.Delegate(GetMapEffectModule(), (uint)x.Slot, (ushort)x.State, (ushort)timelineIndex);
+                MapEffect.Delegate((FFXIVClientStructs.FFXIV.Client.Game.InstanceContent.ContentDirector*)GetMapEffectModule(), (uint)x.Slot, (ushort)x.State, (ushort)timelineIndex);
             }
         }
         P.ApplyFestivals(phase.Festivals);
