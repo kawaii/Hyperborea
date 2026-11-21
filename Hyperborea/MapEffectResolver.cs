@@ -82,14 +82,24 @@ public static class MapEffectResolver
     {
         if (_cfcToManagedSGRow != null) return;
         _cfcToManagedSGRow = [];
-        var sheet = Svc.Data.GetExcelSheet<InstanceContent>();
-        if (sheet == null) return;
-        foreach (var row in sheet)
+        var instanceContentSheet = Svc.Data.GetExcelSheet<InstanceContent>();
+        if (instanceContentSheet == null) return;
+        foreach (var row in instanceContentSheet)
         {
             var cfc = row.ContentFinderCondition.RowId;
             var sg = row.ContentDirectorManagedSG.RowId;
             if (cfc == 0 || sg == 0) continue;
             _cfcToManagedSGRow.TryAdd(cfc, (ushort)sg);
+        }
+        var publicContentSheet = Svc.Data.GetExcelSheet<PublicContent>();
+        if (publicContentSheet == null) return;
+        foreach (var row in publicContentSheet)
+        {
+            var cfc = row.ContentFinderCondition.RowId;
+            // PublicContent stores the ContentDirectorManagedSG row in Unknown0.
+            var sg = row.Unknown0;
+            if (cfc == 0 || sg == 0) continue;
+            _cfcToManagedSGRow.TryAdd(cfc, sg);
         }
     }
 
