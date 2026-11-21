@@ -305,24 +305,46 @@ public unsafe static class Utils
     
     public static bool IsInInnInternal() => Svc.Data.GetExcelSheet<TerritoryType>().GetRowOrDefault(Svc.ClientState.TerritoryType)?.TerritoryIntendedUse.RowId == (uint) TerritoryIntendedUseEnum.Inn;
 
-    internal static uint? InstanceContentWasLoaded = null;
+    private const uint InstanceDirectorPrefix = 0x80030000;
+    private const uint PublicDirectorPrefix = 0x80040000;
+    private static uint? _loadedContentDirectorId;
+
+    private static uint? ResolveContentDirectorId(uint territory, int cfcOverride)
+    {
+        if (cfcOverride != 0)
+        {
+            if (cfcOverride < 0 || cfcOverride > ushort.MaxValue ||
+                Svc.Data.GetExcelSheet<InstanceContent>()?.GetRowOrDefault((uint)cfcOverride) == null)
+                return null;
+
+            return InstanceDirectorPrefix | (uint)cfcOverride;
+        }
+
+        var content = ExcelTerritoryHelper.Get(territory)?.ContentFinderCondition.ValueNullable?.Content;
+        if (content is not { } reference || reference.RowId == 0)
+            return null;
+
+        if (reference.TryGetValue<InstanceContent>(out _))
+            return InstanceDirectorPrefix | reference.RowId;
+        if (reference.TryGetValue<PublicContent>(out _))
+            return PublicDirectorPrefix | reference.RowId;
+        return null;
+    }
     public static void LoadZone(uint territory, bool setPosition, bool setPhase, int a3 = 0, int a4 = 0, int a5 = 1, int a6 = 1, int cfcOverride = 0)
     {
-        if(InstanceContentWasLoaded != null)
+        if (_loadedContentDirectorId is uint previousDirectorId)
         {
-            P.Memory.FinalizeInstanceContentHook.Original((nint)EventFramework.Instance(), 0x80030000 + InstanceContentWasLoaded.Value);
-            InstanceContentWasLoaded = null;
+            P.Memory.FinalizeInstanceContentHook.Original((nint)EventFramework.Instance(), previousDirectorId);
+            _loadedContentDirectorId = null;
         }
         foreach (var x in Svc.Objects)
         {
             x.Struct()->DisableDraw();
         }
-        var content = ExcelTerritoryHelper.Get((uint)territory)?.ContentFinderCondition.ValueNullable?.Content.RowId;
-        if(cfcOverride != 0) content = (ushort?)cfcOverride;
-        if (content != null && content != 0)
+        if (ResolveContentDirectorId(territory, cfcOverride) is uint directorId)
         {
-            P.Memory.SetupInstanceContentHook.Original((nint)EventFramework.Instance(), 0x80030000 + content.Value, content.Value, 0);
-            InstanceContentWasLoaded = content.Value;
+            P.Memory.SetupInstanceContentHook.Original((nint)EventFramework.Instance(), directorId, directorId & 0xFFFF, 0);
+            _loadedContentDirectorId = directorId;
         }
 
         P.Memory.LoadZoneDetour((nint)GameMain.Instance(), territory, a3, (byte)a4, (byte)a5, (byte)a6);
